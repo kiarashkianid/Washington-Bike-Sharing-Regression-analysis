@@ -14,13 +14,17 @@ bikes_raw$is_winter <- ifelse(bikes_raw$season == 1, 1, 0)
 # convert date to date format
 bikes_raw$dteday <- as.Date(bikes_raw$dteday)
 
+# define sin and cos versions of hour
+bikes_raw$hr_sin <- sin(2 * pi *bikes_raw$hr / 24)
+bikes_raw$hr_cos <- cos(2 * pi *bikes_raw$hr / 24)
+
 # ___________________________________________
-# Describe Data
+# Describe Data with Tables and Graphs
 # ___________________________________________
 
 summary(bikes_raw)
 
-x = bikes_raw$is_winter
+x = bikes_raw$hum
 y = bikes_raw$cnt
 
 x_bar = mean(x)
@@ -33,16 +37,21 @@ beta_0_hat = y_bar - beta_1_hat * x_bar
 
 ### see data trends with this plot below
 
-plot(bikes_raw$atemp, y,
+plot(x, y,
      main = "Count versus x",
      xlab = "x", ylab = "Count",
      pch = 16,                       # Solid circle
      col = rgb(0, 0.5, 0.5, alpha = 0.1),# Blue color with 50% transparency
      cex = 0.7)                      # Smaller point size
 
-# ___________________________________________
-# Plot Data
-# ___________________________________________
+'### var relationship tracker
+#      -  is_winter   # dummy
+#      -  hr          # definitely nonlinear
+#      -  yr          # dummy
+#      -  workingday  # dummy
+#      -  atemp       # 
+#      -  hum         # 
+#      -  windspeed   # 
 
 ### plot the trend by week
 
@@ -72,10 +81,16 @@ ggplot(weekly_bikes, aes(x = week, y = weekly_count)) +
 #       col=c("blue"), lty=2)
 
 # ___________________________________________
-# Analyze Data
+# MODEL 1:  all linear relationships
 # ___________________________________________
 
 fitted_model = lm(cnt ~ is_winter + hr + yr + workingday + atemp + hum + windspeed, 
                     data = bikes_raw)
 
 X = model.matrix(fitted_model)
+
+### check linearity assumptions
+
+# ___________________________________________
+# MODEL 2:  some variables are non-linear
+# ___________________________________________
