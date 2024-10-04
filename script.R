@@ -11,6 +11,9 @@ bikes_raw <- read.csv("hour.csv", header = TRUE, sep = ",")
 # Create a new variable 'is_winter' that is 1 if 'Season' is winter (1)
 bikes_raw$is_winter <- ifelse(bikes_raw$season == 1, 1, 0)
 
+# convert date to date format
+bikes_raw$dteday <- as.Date(bikes_raw$dteday)
+
 # ___________________________________________
 # Describe Data
 # ___________________________________________
@@ -28,13 +31,20 @@ s_xy = sum( (y - y_bar) * (x - x_bar) )
 beta_1_hat = s_xy / s_xx 
 beta_0_hat = y_bar - beta_1_hat * x_bar
 
+### see data trends with this plot below
+
+plot(bikes_raw$atemp, y,
+     main = "Count versus x",
+     xlab = "x", ylab = "Count",
+     pch = 16,                       # Solid circle
+     col = rgb(0, 0.5, 0.5, alpha = 0.1),# Blue color with 50% transparency
+     cex = 0.7)                      # Smaller point size
+
 # ___________________________________________
 # Plot Data
 # ___________________________________________
 
 ### plot the trend by week
-# Convert 'dteday' to Date format if it is not already
-bikes_raw$dteday <- as.Date(bikes_raw$dteday)
 
 # Extract the week number and year from 'dteday' and create a new column for it
 bikes_raw$week <- paste0(year(bikes_raw$dteday), "-W", week(bikes_raw$dteday))
