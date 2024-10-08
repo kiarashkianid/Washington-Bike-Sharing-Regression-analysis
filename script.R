@@ -15,8 +15,8 @@ bikes_raw$is_winter <- ifelse(bikes_raw$season == 1, 1, 0)
 bikes_raw$dteday <- as.Date(bikes_raw$dteday)
 
 # define sin and cos versions of hour
-bikes_raw$hr_sin <- sin(2 * pi *bikes_raw$hr / 24)
-bikes_raw$hr_cos <- cos(2 * pi *bikes_raw$hr / 24)
+bikes_raw$hr_sin <- sin(2 * pi * bikes_raw$hr / 24)
+bikes_raw$hr_cos <- cos(2 * pi * bikes_raw$hr / 24)
 
 # ___________________________________________
 # Describe Data with Tables and Graphs
@@ -44,7 +44,7 @@ plot(x, y,
      col = rgb(0, 0.5, 0.5, alpha = 0.1),# Blue color with 50% transparency
      cex = 0.7)                      # Smaller point size
 
-'### var relationship tracker
+### var relationship tracker
 #      -  is_winter   # dummy
 #      -  hr          # definitely nonlinear
 #      -  yr          # dummy
@@ -55,7 +55,7 @@ plot(x, y,
 
 ### plot the trend by week
 
-# Extract the week number and year from 'dteday' and create a new column for it
+# Extract the week number and year from dteday and create a new column for it
 bikes_raw$week <- paste0(year(bikes_raw$dteday), "-W", week(bikes_raw$dteday))
 
 # Aggregate the total rental counts by week
@@ -84,7 +84,7 @@ ggplot(weekly_bikes, aes(x = week, y = weekly_count)) +
 # MODEL 1:  all linear relationships
 # ___________________________________________
 
-fitted_model = lm(cnt ~ is_winter + hr + yr + workingday + atemp + hum + windspeed, 
+fitted_model = lm(cnt ~ is_winter + hr + workingday + temp + hum + windspeed, 
                     data = bikes_raw)
 
 X = model.matrix(fitted_model)
