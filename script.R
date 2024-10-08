@@ -84,13 +84,20 @@ ggplot(weekly_bikes, aes(x = week, y = weekly_count)) +
 # MODEL 1:  all linear relationships
 # ___________________________________________
 
-fitted_model = lm(cnt ~ is_winter + hr + workingday + temp + hum + windspeed, 
+model <- lm(cnt ~ is_winter + hr + workingday + temp + hum + windspeed, 
                     data = bikes_raw)
 
 X = model.matrix(fitted_model)
 
+### residuals plot
+plot(model$fitted.values, residuals(model),
+     xlab = "Fitted values", ylab = "Residuals",
+     main = "Residuals vs Fitted Plot",
+     pch = 16,
+     col = adjustcolor("steelblue", alpha.f = 0.25),
+     cex = 0.75)
+abline(h = 0, col = "red")
+
 ### check linearity assumptions
 
-# ___________________________________________
-# MODEL 2:  some variables are non-linear
-# ___________________________________________
+plot
