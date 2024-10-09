@@ -87,8 +87,6 @@ ggplot(weekly_bikes, aes(x = week, y = weekly_count)) +
 model <- lm(cnt ~ is_winter + hr + workingday + temp + hum + windspeed, 
                     data = bikes_raw)
 
-X = model.matrix(fitted_model)
-
 ### residuals plot
 plot(model$fitted.values, residuals(model),
      xlab = "Fitted values", ylab = "Residuals",
@@ -101,3 +99,9 @@ abline(h = 0, col = "red")
 ### check linearity assumptions
 
 plot
+
+
+
+
+
+X = model.matrix(fitted_model)
