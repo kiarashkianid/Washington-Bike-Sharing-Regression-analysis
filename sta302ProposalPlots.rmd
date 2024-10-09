@@ -1,0 +1,118 @@
+---
+title: "STA302 Group 85 Project Proposal"
+authors: "Kiarash Kianidehkordi,Joyce Lin,Min Ji koo "
+output: html_notebook
+---
+
+#Assumptions of linear regression
+Y is related to x by the linear regression model
+Yi=B0+B1xi+ei
+the errors e1...ei are independent of each other
+the errors e1,ei have common variance of sigma^2
+the errors are normally disturbuted with a mean of 0 and variance of sigma^2
+
+
+
+#Installing relevant packages and libraries
+```{r}
+install.packages("tidyverse")
+install.packages("readr")
+install.packages("dplyr")
+
+library(readr)
+library(dbplyr)
+
+```
+
+```{r}
+totalData <-read_csv("C:\\Users\\Kiarash\\OneDrive\\Desktop\\University\\statistics\\STA302\\bike+sharing+dataset\\hour.csv")
+head(totalData)
+
+str(totalData)
+
+summary(totalData)
+hourData<-totalData[totalData$yr==1,]
+#plot(hourData[, c(1,3,11,17)], col="cadetblue")
+
+
+# Scatter plot of bike rental count vs season
+plot(hourData$season, hourData$cnt,
+     main = "Bike Rental Count vs Season",
+     xlab = "Season",
+     ylab = "Bike Rental Count",
+     col = "lightblue",
+     pch = 19)
+
+boxplot(hourData$cnt ~ hourData$season,
+        main = "Bike Rental Count by Season",
+        xlab = "Season",
+        ylab = "Bike Rental Count",
+        col = "lightgreen",
+        names = c("Winter", "Spring", "Summer", "Fall"))
+# Scatter plot of bike rental count vs wind speed
+plot(hourData$windspeed, hourData$cnt,
+     main = "Bike Rental Count vs Wind Speed",
+     xlab = "Wind Speed",
+     ylab = "Bike Rental Count",
+     col = "lightblue",
+     pch = 19)
+# Scatter plot of bike rental count vs temperature
+plot(hourData$temp, hourData$cnt,
+     main = "Bike Rental Count vs Temperature",
+     xlab = "Temperature",
+     ylab = "Bike Rental Count",
+     col = "lightblue",
+     pch = 19)
+
+# Scatter plot of bike rental count vs humidity
+plot(hourData$hum, hourData$cnt,
+     main = "Bike Rental Count vs Humidity",
+     xlab = "Humidity",
+     ylab = "Bike Rental Count",
+     col = "lightblue",
+     pch = 19)
+# Scatter plot of bike rental count vs hour of the day
+plot(hourData$hr, hourData$cnt,
+     main = "Bike Rental Count vs Hour of the Day",
+     xlab = "Hour of the Day",
+     ylab = "Bike Rental Count",
+     col = "lightblue",
+     pch = 19)
+boxplot(hourData$cnt ~ hourData$workingday,
+        main = "Bike Rental Count by Working Day",
+        xlab = "Working Day",
+        ylab = "Bike Rental Count",
+        col = "lightcoral",
+        names = c("Non-Working Day", "Working Day"))
+
+```
+```{r}
+#replace data = hourData with either of the season data incase you want to fit regression models for each season
+winter_data<- hourData[hourData$season==1,]
+spring_data<- hourData[hourData$season==2,]
+summer_data<- hourData[hourData$season==3,]
+fall_data<- hourData[hourData$season==4,]
+
+
+
+
+# Convert season to a factor variable
+hourData$season <- as.factor(hourData$season)
+
+# Fit the linear model
+fit <- lm(cnt ~ temp + season, data = hourData)
+
+# Display the summary of the model
+summary(fit)
+
+# Plot only the residuals vs fitted and normal Q-Q plot
+#par(mfrow = c(1, 2))  # Set up the plotting area to show 2 plots side by side
+
+# 1. Residuals vs Fitted plot
+plot(fit, which = 1)
+
+# 2. Normal Q-Q plot
+plot(fit, which = 2)
+
+
+```
