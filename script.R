@@ -14,18 +14,24 @@ bikes_raw$is_winter <- ifelse(bikes_raw$season == 1, 1, 0)
 # convert date to date format
 bikes_raw$dteday <- as.Date(bikes_raw$dteday)
 
+# Write the modified DataFrame into a new CSV file
+write.csv(bikes_raw, "hour_modified.csv", row.names = FALSE)
+
+# after installing libraries, skip to running this
+bikes <- read.csv("hour_modified.csv", header = TRUE, sep = ",")
+
 # define sin and cos versions of hour
-bikes_raw$hr_sin <- sin(2 * pi * bikes_raw$hr / 24)
-bikes_raw$hr_cos <- cos(2 * pi * bikes_raw$hr / 24)
+bikes$hr_sin <- sin(2 * pi * bikes$hr / 24)
+bikes$hr_cos <- cos(2 * pi * bikes$hr / 24)
 
 # ___________________________________________
 # Describe Data with Tables and Graphs
 # ___________________________________________
 
-summary(bikes_raw)
+summary(bikes)
 
-x = bikes_raw$hum
-y = bikes_raw$cnt
+x = bikes$hum
+y = bikes$cnt
 
 x_bar = mean(x)
 y_bar = mean(y)
@@ -56,10 +62,10 @@ plot(x, y,
 ### plot the trend by week
 
 # Extract the week number and year from dteday and create a new column for it
-bikes_raw$week <- paste0(year(bikes_raw$dteday), "-W", week(bikes_raw$dteday))
+bikes$week <- paste0(year(bikes$dteday), "-W", week(bikes$dteday))
 
 # Aggregate the total rental counts by week
-weekly_bikes <- bikes_raw %>%
+weekly_bikes <- bikes %>%
   group_by(week) %>%
   summarise(weekly_count = sum(cnt))
 
@@ -85,7 +91,7 @@ ggplot(weekly_bikes, aes(x = week, y = weekly_count)) +
 # ___________________________________________
 
 model <- lm(cnt ~ is_winter + hr + workingday + temp + hum + windspeed, 
-                    data = bikes_raw)
+                    data = bikes)
 
 ### residuals plot
 plot(model$fitted.values, residuals(model),
