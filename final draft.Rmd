@@ -1,1 +1,53 @@
-data <- read.csv("hour.csv", header = TRUE, sep = ",")
+---
+title: "Should Washington DC's Bikeshare System Close During the Winter Months?"
+author: "Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+bibliography: references.bib
+---
+
+# Contributions
+
+- **Kiarash Kianidehkordi**:  
+- **Min Ji Koo**:  
+- **Joyce Lin**:  
+
+# Introduction
+
+In the United States, motor transportation accounts for 20% of greenhouse gas emissions (Agency, 2005; Gotschi & Mills, 2008). Bike-sharing systems represent a new generation of traditional bike rentals,where the processes of membership, rental, and return have been automated. Integrating bike-sharing programs into urban transportation networks is considered as a sustainable approach to reducing air pollution (CO2 emissions) and conserving natural resources (Bajracharya, Mulya, Purbasari, & Hwang, 2018; Cai et al., 2019; Lumsdon & Tolley, 2001; Zhang, Zhang, Duan, & Bryde, 2015).
+
+This integration contributes to a greener environment, promotes economic transportation by alleviating traffic congestion and noise pollution, and fosters healthier communities by addressing issues like diabetes and obesity(Shaheen et al. 2013). Environmental and logistical factors are common metrics that researchers look at to determine the optimal allocation of bikes.
+
+Numerous studies indicate a strong correlation between climate conditions and bike-sharing demand. Seasonal fluctuations in bike-sharing usage are often attributed to weather factors (Fournier, Christofa, and Knodler, 2017; Wadud, 2014). For instance, many bike-sharing programs, such as Great Rides, Capital Bikeshare, and Boulder B-cycle, cease operations in winter due to lower trip generation (Godavarthy & Taleqani, 2017).Given this context, the paper aims to investigate if **it is statistically justifiable for Washington DC’s bike-sharing system to reassess its operational strategy during the winter months due to a significant decline in bike sharing usage frequency?**
+
+# Data Description
+
+The bike sharing dataset, extracted from the UCI Machine Learning Repository (Fanaee-T, H. 2013), contains two years' worth of data from the Capital Bikeshare (CBS) system. In the CBS system, when a rental occurs, the software collects basic trip information such as duration, start date, end date, start station, end station, bike number, and member type (Fanaee-T, H., Gama, J 2013).
+
+To avoid trend issues, the authors of the original paper (Fanaee-T, H., Gama, J,2013) selected data corresponding only to the years 2011 and 2012, consisting of 3,807,587 records. After collecting the raw trip data, the authors aggregated it at two levels: hourly and daily. The hourly time series contains 17,379 hours, and the daily time series contains 731 days (Fanaee-T, H., Gama, J,2013). Both time series were split into two sets: 2011 (train) and 2012 (test).
+
+Weather temperature, apparent temperature, wind speed, wind gust, humidity, pressure, dew point, and visibility for each hour from January 1, 2011, to December 31, 2012, for Washington, D.C., USA, were extracted from (Freemeteo 2013) and mapped to the corresponding hours in the bike rental time series.
+
+For hours with missing weather reports, the closest available report was used. Additionally, the official holidays of Washington, D.C., were extracted and mapped to the corresponding dates from (Department of Human Resources 2013). Holidays were combined with weekends, and each day was classified as either a working day or a non-working day. Based on the weather data, each hour was assigned one of four weather grades: good, cloudy, bad, or very bad (Fanaee-T, H., Gama, J,2013).
+
+In the hourly scale, each record includes variables such as hour, month, working day status, season, weather grade, temperature, felt temperature, humidity, and wind speed, along with the hourly aggregated count of rented bikes as the target value. In the daily scale, each record contains variables such as month, working day status, season, daily average weather grade, daily average temperature, daily average felt temperature, daily average humidity, and daily average wind speed.
+
+# Preliminary Results
+
+- **Data Source**: Bikeshare data from Washington DC, covering 2011-2012.
+- **Variables**:
+  - `temp`: Temperature (°C)
+  - `humidity`: Humidity (%)
+  - `hour`: Hour of the day (0-23)
+  - `count`: Number of bike rentals
+  
+Here is a sample of the dataset:
+
+```{r}
+# Load libraries and data
+library(ggplot2)
+data <- read.csv("your-data-file.csv")
+head(data)
+```
