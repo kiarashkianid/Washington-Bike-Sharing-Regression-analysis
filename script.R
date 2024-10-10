@@ -99,7 +99,7 @@ plot(model$fitted.values, residuals(model),
      main = "Residuals vs Fitted Plot",
      pch = 16,
      col = adjustcolor("steelblue", alpha.f = 0.25),
-     cex = 0.75)
+     cex = 0.25)
 abline(h = 0, col = "red")
 
 ### check linearity assumptions

@@ -2,10 +2,7 @@
 title: "Should Washington DC's Bikeshare System Close During the Winter Months?"
 author: "Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin"
 date: "`r Sys.Date()`"
-output:
-  pdf_document: default
-  html_document: default
-bibliography: references.bib
+output: html_document
 ---
 
 # Contributions
@@ -20,13 +17,13 @@ In the United States, motor transportation accounts for 20% of greenhouse gas em
 
 This integration contributes to a greener environment, promotes economic transportation by alleviating traffic congestion and noise pollution, and fosters healthier communities by addressing issues like diabetes and obesity(Shaheen et al. 2013). Environmental and logistical factors are common metrics that researchers look at to determine the optimal allocation of bikes.
 
-Numerous studies indicate a strong correlation between climate conditions and bike-sharing demand. Seasonal fluctuations in bike-sharing usage are often attributed to weather factors (Fournier, Christofa, and Knodler, 2017; Wadud, 2014). For instance, many bike-sharing programs, such as Great Rides, Capital Bikeshare, and Boulder B-cycle, cease operations in winter due to lower trip generation (Godavarthy & Taleqani, 2017).Given this context, the paper aims to investigate if **it is statistically justifiable for Washington DC’s bike-sharing system to reassess its operational strategy during the winter months due to a significant decline in bike sharing usage frequency?**
+Numerous studies indicate a strong correlation between climate conditions and bike-sharing demand. Seasonal fluctuations in bike-sharing usage are often attributed to weather factors (Fournier, Christofa, and Knodler, 2017; Wadud, 2014). For instance, many bike-sharing programs, such as Great Rides, Capital Bikeshare, and Boulder B-cycle, cease operations in winter due to lower trip generation (Godavarthy & Taleqani, 2017). Given this context, the paper aims to investigate if **it is statistically justifiable for Washington DC’s bike-sharing system to reassess its operational strategy during the winter months due to a significant decline in bike sharing usage frequency?**
 
 # Data Description
 
 The bike sharing dataset, extracted from the UCI Machine Learning Repository (Fanaee-T, H. 2013), contains two years' worth of data from the Capital Bikeshare (CBS) system. In the CBS system, when a rental occurs, the software collects basic trip information such as duration, start date, end date, start station, end station, bike number, and member type (Fanaee-T, H., Gama, J 2013).
 
-To avoid trend issues, the authors of the original paper (Fanaee-T, H., Gama, J,2013) selected data corresponding only to the years 2011 and 2012, consisting of 3,807,587 records. After collecting the raw trip data, the authors aggregated it at two levels: hourly and daily. The hourly time series contains 17,379 hours, and the daily time series contains 731 days (Fanaee-T, H., Gama, J,2013). Both time series were split into two sets: 2011 (train) and 2012 (test).
+To avoid trend issues, the authors of the original paper (Fanaee-T, H., Gama, J, 2013) selected data corresponding only to the years 2011 and 2012, consisting of 3,807,587 records. After collecting the raw trip data, the authors aggregated it at two levels: hourly and daily. The hourly time series contains 17,379 hours, and the daily time series contains 731 days (Fanaee-T, H., Gama, J, 2013). Both time series were split into two sets: 2011 (train) and 2012 (test).
 
 Weather temperature, apparent temperature, wind speed, wind gust, humidity, pressure, dew point, and visibility for each hour from January 1, 2011, to December 31, 2012, for Washington, D.C., USA, were extracted from (Freemeteo 2013) and mapped to the corresponding hours in the bike rental time series.
 
@@ -36,18 +33,43 @@ In the hourly scale, each record includes variables such as hour, month, working
 
 # Preliminary Results
 
-- **Data Source**: Bikeshare data from Washington DC, covering 2011-2012.
-- **Variables**:
-  - `temp`: Temperature (°C)
-  - `humidity`: Humidity (%)
-  - `hour`: Hour of the day (0-23)
-  - `count`: Number of bike rentals
-  
-Here is a sample of the dataset:
+**Data Source**: Bikeshare data from Washington DC, covering 2011-2012.
+
+- **Variables used in this analysis**:
+  - `season`: season (1: winter, 2: spring, 3: summer, 4: fall)
+    - `is_winter`: variable created 
+  - `hr`: hour of the day (0-23)
+  - `workingday`: weekday that is not a holiday (1, 0 otherwise)
+  - `temp`: normalized temperature (°C), calculated by (t - t_min) / (t_max - t_min)
+  - `hum`: normalized humidity. The values are divided to 100 (max)
+  - `windspeed`: Normalized wind speed. The values are divided to 67 (max)
+  - `cnt`: count of total rental bikes including both casual and registered
+
+- **Other variables**
+  - `dteday`: date variable (YYYY-MM-DD)
+  - `mnth`: month variable (1-12)
+  - `yr`: year (0: 2011, 1: 2012)
+  - `weathersit`: discrete variable denoting the weather conditions during a given hour
+  - `atemp`: Normalized feeling temperature in Celsius
+
+
 
 ```{r}
 # Load libraries and data
 library(ggplot2)
-data <- read.csv("your-data-file.csv")
-head(data)
+library(readr)
+library(tidyverse)
+data <- read.csv("hour_modified.csv")
+summary(data)
 ```
+
+
+constant variance and linearity assumptions are violated.
+
+Create QQplot to see distribution of errors (analyze normality)
+
+
+
+
+
+
