@@ -30,7 +30,7 @@ bikes$hr_cos <- cos(2 * pi * bikes$hr / 24)
 
 summary(bikes)
 
-x = bikes$hum
+x = bikes$hour
 y = bikes$cnt
 
 x_bar = mean(x)

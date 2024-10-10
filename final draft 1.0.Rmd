@@ -13,7 +13,7 @@ output: html_document
 
 # Introduction
 
-In the United States, motor transportation accounts for 20% of greenhouse gas emissions (Agency, 2005; Gotschi & Mills, 2008). Bike-sharing systems represent a new generation of traditional bike rentals,where the processes of membership, rental, and return have been automated. Integrating bike-sharing programs into urban transportation networks is considered as a sustainable approach to reducing air pollution (CO2 emissions) and conserving natural resources (Bajracharya, Mulya, Purbasari, & Hwang, 2018; Cai et al., 2019; Lumsdon & Tolley, 2001; Zhang, Zhang, Duan, & Bryde, 2015).
+In the United States, motor transportation accounts for 20% of greenhouse gas emissions (Agency, 2005; Gotschi & Mills, 2008). Bike-sharing systems represent a new generation of traditional bike rentals, where the processes of membership, rental, and return have been automated. Integrating bike-sharing programs into urban transportation networks is considered as a sustainable approach to reducing air pollution (CO2 emissions) and conserving natural resources (Bajracharya, Mulya, Purbasari, & Hwang, 2018; Cai et al., 2019; Lumsdon & Tolley, 2001; Zhang, Zhang, Duan, & Bryde, 2015).
 
 This integration contributes to a greener environment, promotes economic transportation by alleviating traffic congestion and noise pollution, and fosters healthier communities by addressing issues like diabetes and obesity(Shaheen et al. 2013). Environmental and logistical factors are common metrics that researchers look at to determine the optimal allocation of bikes.
 
@@ -37,8 +37,7 @@ In the hourly scale, each record includes variables such as hour, month, working
 
 - **Variables used in this analysis**:
   - `season`: season (1: winter, 2: spring, 3: summer, 4: fall)
-    - `is_winter`: variable created 
-  - `hr`: hour of the day (0-23)
+    - `is_winter`: variable created from season (1: winter, 0 otherwise)
   - `workingday`: weekday that is not a holiday (1, 0 otherwise)
   - `temp`: normalized temperature (°C), calculated by (t - t_min) / (t_max - t_min)
   - `hum`: normalized humidity. The values are divided to 100 (max)
@@ -47,20 +46,35 @@ In the hourly scale, each record includes variables such as hour, month, working
 
 - **Other variables**
   - `dteday`: date variable (YYYY-MM-DD)
+  - `hr`: hour of the day (0-23)
   - `mnth`: month variable (1-12)
   - `yr`: year (0: 2011, 1: 2012)
   - `weathersit`: discrete variable denoting the weather conditions during a given hour
   - `atemp`: Normalized feeling temperature in Celsius
 
+I will note that while this dataset has time series elements, the research question focuses on the effect of *winter specifically* on Bikeshare usage.  Thus, I believe a linear regression is still appropriate with this research question, as the analysis will be focusing on the effect of winter = 1 versus winter = 0.
 
+This analysis will take data from 2011 and for the hours 5 - 6PM and 8AM.  The year limiter is because only 2011 data is intended to be training data, while  5 - 6PM and 8AM are shown to be the top 3 busiest hours for Bikeshare usage.  Focusing on peak hours in the morning and the afternoon captures the most critical hours for bike share demand and removes temporal continuity that would be present if all hours of the day were considered instead, which would have made this analysis invalid for a linear regression.
+
+Of course, these choices hinge on the assumption that the variation of Bikeshare usage during the top 3 hours, holding other variables like temp and workingday constant, is independent.
 
 ```{r}
 # Load libraries and data
 library(ggplot2)
 library(readr)
 library(tidyverse)
-data <- read.csv("hour_modified.csv")
+data <- read.csv("hour.csv")
+data$dteday <- as.Date(data$dteday)
 summary(data)
+```
+```{r}
+# Group the data by hour and calculate the average 'cnt' (bike usage)
+avg_usage_by_hour <- aggregate(cnt ~ hr, data = data, FUN = mean)
+
+# Sort by average usage in descending order and select the top 3 hours with the highest average usage
+avg_usage_by_hour <- avg_usage_by_hour[order(-avg_usage_by_hour$cnt),]
+top_3_hours <- head(avg_usage_by_hour, 3)
+print(top_3_hours)
 ```
 
 
