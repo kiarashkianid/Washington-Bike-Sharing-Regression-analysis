@@ -6,4 +6,4 @@ Welcome to the repository of Joyce, Kiarash, and Min Ji's Group Assignment for S
 - `hour.csv` is the original dataset used in this paper
   - `hour_modified.csv` is the cleaned and subsetted version of `hour.csv` that contains only data from 2011 during 5-6PM and 8AM
 - `final draft 1.1.Rmd` is the Rmd file as of the complesion of Part 1
-- 'Group Agreement.pdf` is the group agreement document
+- `Group Agreement.pdf` is the group agreement document
