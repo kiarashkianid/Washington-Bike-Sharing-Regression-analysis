@@ -7,7 +7,7 @@ output: html_document
 
 # Contributions
 
-- **Kiarash Kianidehkordi**:  data description, compiling the dataset used in this paper, preliminary analysis code
+- **Kiarash Kianidehkordi**:  introduction, data description, compiling the dataset used in this paper, preliminary analysis code
 - **Min Ji Koo**:  introduction, data description
 - **Joyce Lin**:  introduction, preliminary analysis interpretation, knitting and finalizing the proposal
 
