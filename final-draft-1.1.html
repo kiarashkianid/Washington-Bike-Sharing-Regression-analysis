@@ -11,7 +11,7 @@
 
 <meta name="author" content="Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin" />
 
-<meta name="date" content="2024-10-10" />
+<meta name="date" content="2024-10-11" />
 
 <title>Should Washington DC’s Bikeshare System Reduce Operations During the Winter Months?</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">Should Washington DC’s Bikeshare System
 Reduce Operations During the Winter Months?</h1>
 <h4 class="author">Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin</h4>
-<h4 class="date">2024-10-10</h4>
+<h4 class="date">2024-10-11</h4>
 
 </div>
 
@@ -362,10 +362,10 @@ Reduce Operations During the Winter Months?</h1>
 <h1>Contributions</h1>
 <ul>
 <li><strong>Kiarash Kianidehkordi</strong>: data description, compiling
-the dataset used in this paper</li>
+the dataset used in this paper, preliminary analysis code</li>
 <li><strong>Min Ji Koo</strong>: introduction, data description</li>
-<li><strong>Joyce Lin</strong>: introduction, preliminary analysis,
-editing the proposal</li>
+<li><strong>Joyce Lin</strong>: introduction, preliminary analysis
+interpretation, knitting and finalizing the proposal</li>
 </ul>
 <hr />
 </div>
@@ -374,38 +374,40 @@ editing the proposal</li>
 <p>Motor transportation accounts for a staggering 20% of greenhouse gas
 emissions in the U.S. (Agency, 2005; Gotschi &amp; Mills, 2008), pushing
 the need for sustainable solutions like bike-sharing systems to the
-forefront. These modern bike-sharing programs automate membership,
-rentals, and returns, integrating seamlessly into urban transportation
-networks. This integration is widely recognized as a sustainable
-strategy to reduce CO2 emissions, alleviate traffic congestion, and
-promote healthier communities by addressing public health concerns such
-as obesity and diabetes (Bajracharya et al., 2018; Cai et al., 2019;
-Lumsdon &amp; Tolley, 2001; Zhang et al., 2015; Shaheen et al.,
+forefront. These solutions are widely recognized as sustainable
+strategies to reduce CO2 emissions, alleviate traffic congestion, and
+preventing obesity and diabetes (Bajracharya et al., 2018; Cai et al.,
+2019; Lumsdon &amp; Tolley, 2001; Zhang et al., 2015; Shaheen et al.,
 2013).</p>
 <p>While bike-sharing contributes significantly to environmental and
 health benefits, it must also adapt to the unique demand patterns of the
-specific city that they are installed in. While Bikeshare usage does
-vary on an hourly basis, it is more broadly influenced by factors such
-as seasonality and weather. Numerous studies have demonstrated a strong
-correlation between climate conditions and bike-sharing usage (Fournier,
-Christofa, and Knodler, 2017; Wadud, 2014; Beigi et al., 2022). Seasonal
-fluctuations—particularly a sharp decline during the winter months—have
-led many bike-sharing programs, such as Great Rides, Capital Bikeshare,
-and Boulder B-cycle, to temporarily suspend operations due to
-significantly lower trip generation (Godavarthy &amp; Taleqani, 2017).
-Thus, environmental and logistical factors are common metrics that
-researchers look at to determine the optimal allocation of bikes.</p>
-<p>Our analysis focuses on Washington DC’s Capital Bikeshare (referred
-to as Bikeshare in this paper) data in 2011 with a focus on peak hours
-(5-6 PM and 8 AM). This paper ultimately seeks to determine
+specific city that they are installed in. Thus, environmental and
+logistical factors are common metrics that researchers look at to
+determine the optimal allocation of bikes. The effects of these metrics
+on bikeshare usage is well documented in literature.</p>
+<p>Fournier, Christofa, and Knodler (2017) built a sinusodial model in
+their paper to examine seasonal bikeshare demand, and found a strong
+correlation between climate conditions, workday influences and
+bike-sharing usage.</p>
+<p>Godavarthy &amp; Taleqani (2017) in particular noted that many
+bike-sharing programs such as Great Rides, Capital Bikeshare, and
+Boulder B-cycle, temporarily suspended operations during winter due to
+significantly lower trip generation.</p>
+<p>Beigi et al. (2022) examined the reallocation strategies used by
+Capital Bikeshare in Washington DC and found that the location of
+density of bikeshare stations significantly influenced bikeshare usage.
+While location data is not considered in our paper, the allocation of
+bikeshare stations is still an important factor to keep in mind
+regarding the success of a bikeshare program.</p>
+<p>Our analysis focuses on Capital Bikeshare (or just Bikeshare) in 2011
+during peak hours (5-6 PM and 8 AM), seeking to determine
 <strong>whether reducing operations to reflect seasonal demand changes
 is reasonable for Bikeshare, as supported by the broader evidence on
 climate impacts and bikeshare usage.</strong></p>
 <p>Note that while this dataset has time series elements, the research
 question asks for the effect of <em>winter specifically</em> on
-Bikeshare usage. Thus, I believe a linear regression is still
-appropriate with this research question, as the analysis will be
-focusing on the effect of winter = 1 versus winter = 0.</p>
+Bikeshare usage. Thus, we believe a linear regression is still
+appropriate with this research question.</p>
 <hr />
 </div>
 <div id="data-description" class="section level1">
