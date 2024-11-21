@@ -21,7 +21,7 @@ install.packages("dplyr")
 
 library(readr)
 library(dbplyr)
-
+library(MASS)
 ```
 
 ```{r}
@@ -87,32 +87,154 @@ boxplot(hourData$cnt ~ hourData$workingday,
 
 ```
 ```{r}
-#replace data = hourData with either of the season data incase you want to fit regression models for each season
-winter_data<- hourData[hourData$season==1,]
-spring_data<- hourData[hourData$season==2,]
-summer_data<- hourData[hourData$season==3,]
-fall_data<- hourData[hourData$season==4,]
-
-
-
-
-# Convert season to a factor variable
-hourData$season <- as.factor(hourData$season)
-
-# Fit the linear model
-fit <- lm(cnt ~ temp + season, data = hourData)
+# Fit the linear model with Winter and Working Day as binary indicators
+initialFitted<-lm( cnt~ temp + windspeed + hum  + hr + I(season == 1) + I(workingday == 1), data = hourData)
 
 # Display the summary of the model
-summary(fit)
+summary(initialFitted)
 
-# Plot only the residuals vs fitted and normal Q-Q plot
-#par(mfrow = c(1, 2))  # Set up the plotting area to show 2 plots side by side
+# Visualize diagnostics
+par(mfrow = c(1, 2))  # Arrange plots side by side
 
-# 1. Residuals vs Fitted plot
-plot(fit, which = 1)
 
 # 2. Normal Q-Q plot
-plot(fit, which = 2)
+plot(initialFitted, which = 2)
 
+
+
+```
+
+
+#Analysis of regression based on the proposed procedure in part 2 
+The procedure followed in this analysis is available at [Sta302 Project Part 2](https://github.com/kiarashkianid/Washington-Bike-Sharing-Regression-analysis/blob/main/STA302%20project%20part%202.drawio%20(1).png).
+
+#Step 1
+we will use the initialFitted model as our starting point. To check the assumption of linear regression our first task is to draw residual vs fitted plot and residual vs predicors scatter plot 
+```{r}
+# Select relevant predictors for the matrix plot
+predictors <- hourData[, c("temp", "hum", "windspeed","season","workingday")]
+
+# Create a matrix plot
+pairs(predictors,
+      main = "Matrix Plot of Predictors",
+      col = "lightblue",
+      pch = 19)
+
+```
+#we also draw the corrolation matrix to see the relations among the predictors and response.
+```{r}
+# Select relevant numerical predictors for correlation analysis
+numericalData <- hourData[, c("temp", "hum", "windspeed", "hr","workingday","season","cnt")]
+
+# Calculate the correlation matrix
+corMatrix <- cor(numericalData)
+
+# Print the correlation matrix
+print(corMatrix)
+
+# Install and load the corrplot package
+install.packages("corrplot")
+library(corrplot)
+
+# Create a correlation plot
+corrplot(corMatrix, method = "circle", type = "upper", 
+         tl.col = "black", tl.srt = 45, # Rotate labels for better readability
+         title = "Correlation Matrix of Variables", 
+         mar = c(0,0,1,0))  # Adjust margins for better display
+
+```
+as we see count has highest correlation with temperature, humidity and hour of the day and least correlation with wind speed and whether the day is working day
+#Step 2: the residual vs fitted plot and the residual vs predictors scatter plots
+```{R}
+# 1. Residuals vs Fitted plot
+plot(initialFitted, which = 1)
+
+# Calculate residuals
+residuals <- initialFitted$residuals
+
+# Set up the plotting area to display multiple plots
+
+# 1. Residuals vs Temperature
+plot(hourData$temp, residuals,
+     main = "Residuals vs Temperature",
+     xlab = "Temperature",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 2. Residuals vs Windspeed
+plot(hourData$windspeed, residuals,
+     main = "Residuals vs Windspeed",
+     xlab = "Windspeed",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 3. Residuals vs Humidity
+plot(hourData$hum, residuals,
+     main = "Residuals vs Humidity",
+     xlab = "Humidity",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 4. Residuals vs Hour of the Day
+plot(hourData$hr, residuals,
+     main = "Residuals vs Hour of the Day",
+     xlab = "Hour of the Day",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 5. Box plot for Residuals vs Winter (1 = Yes, 0 = No)
+boxplot(residuals ~ (hourData$season == 1),
+        main = "Residuals vs Winter",
+        xlab = "Winter (1 = Yes, 0 = No)",
+        ylab = "Residuals",
+        col = c("skyblue", "lightcoral"),
+        names = c("No (0)", "Yes (1)"),
+        border = "darkblue",
+        notch = TRUE) # Adds notches to visualize median differences
+
+# 6. Box plot for Residuals vs Working Day (1 = Yes, 0 = No)
+boxplot(residuals ~ hourData$workingday,
+        main = "Residuals vs Working Day",
+        xlab = "Working Day (1 = Yes, 0 = No)",
+        ylab = "Residuals",
+        col = c("lightgreen", "orange"),
+        names = c("No (0)", "Yes (1)"),
+        border = "darkgreen",
+        notch = TRUE) # Adds notches to visualize median differences
+
+# Reset the plotting layout to a single plot
+par(mfrow = c(1, 1))
+
+```
+- Observing residual vs fitted plot of the model , we see that the residuals show a reverse funnel pattern for fitted values within (-100-250+-20) and a scattered pattern from 250+.
+More so we make the following observations on the single predictor vs residual plots : 
+
+
+-  residual vs Temperature : most residuals fall within the 0.2-0.8 temperatures and the plot has a bell shape
+-  residual vs Wind speed : we see a funnel pattern with most residuals being in the lower wind speeds.
+-  residual vs Humidity :  residuals are scattered with no observable patterns
+-  residual vs hour of the day : we observe a bi modal pattern that resemble the rush hours ( opening and closing time )
+For residuals vs dummy variables of isWinter and isWorking day :
+-  residual vs Winter : we observe both winter and not winter residuals are disturbuted around zero with IQR for not-winter residuals being (400:-400)) while IQR for winter residuals being (-200: 200). both 
+
+#Step 3 
+Since a pattern seems to be present in residual vs predictors and residual vs fitted , we need to add new terms or transform predictor variables or response variables
+
+```{R}
+# Perform backward selection based on BIC
+backwardBICModel <- step(initialFitted, direction = "backward", k = log(nrow(hourData)))
+
+# Display the summary of the selected model
+summary(backwardBICModel)
+
+# Plot the residuals vs fitted values for the final model
+plot(backwardBICModel, which = 1)  # Residuals vs Fitted
+
+# Plot normal Q-Q plot
+plot(backwardBICModel, which = 2)  # Normal Q-Q plot
 
 ```
