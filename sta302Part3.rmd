@@ -91,8 +91,7 @@ boxplot(hourData$cnt ~ hourData$workingday,
 ```
 ```{r}
 # Fit the linear model with Winter and Working Day as binary indicators
-initialFitted<-lm (sqrt(cnt) ~ temp +I(temp^2)+ log(windspeed+1) + sqrt(hum)+ I(hum^2) + I(season == 1) + I(workingday == 1)+ hum*windspeed, data = hourData)
-
+initialFitted <-lm (cnt ~ temp +  windspeed + hum + I(season == 1) + I(workingday == 1), data = hourData)
 # Display the summary of the model
 summary(initialFitted)
 
@@ -158,7 +157,7 @@ residuals <- initialFitted$residuals
 # Set up the plotting area to display multiple plots
 
 # 1. Residuals vs Temperature
-plot(hourData$temp, residuals,
+plot (hourData$temp, residuals,
      main = "Residuals vs Temperature",
      xlab = "Temperature",
      ylab = "Residuals",
@@ -166,7 +165,7 @@ plot(hourData$temp, residuals,
      pch = 19)
 
 # 2. Residuals vs Windspeed
-plot( log(hourData$windspeed+1), residuals,
+plot( hourData$windspeed, residuals,
      main = "Residuals vs Windspeed",
      xlab = "Windspeed",
      ylab = "Residuals",
@@ -174,7 +173,7 @@ plot( log(hourData$windspeed+1), residuals,
      pch = 19)
 
 # 3. Residuals vs Humidity
-plot(sqrt(hourData$hum), residuals,
+plot(hourData$hum, residuals,
      main = "Residuals vs Humidity",
      xlab = "Humidity",
      ylab = "Residuals",
@@ -218,6 +217,8 @@ For residuals vs dummy variables of isWinter and isWorking day :
 
 #Step 3 
 Since a pattern seems to be present in residual vs predictors and residual vs fitted , we need to add new terms or transform predictor variables or response variables. We will start by checking for multi-col linearity  and non linearity of predictors.
+
+
 ```{R}
 #find the VIF to check if multi-col linearity is present
 vif_values <- vif(initialFitted)
@@ -225,31 +226,144 @@ vif_values <- vif(initialFitted)
 # Print VIF values
 print(vif_values)
 ```
-initialFitted<-lm (sqrt(cnt) ~ temp +I(temp^2)+ log(windspeed+1) + sqrt(hum)+ I(hum^2) + I(season == 1) + I(workingday == 1)+ hum*windspeed, data = hourData)
-
-Since VIF values are less than 5 , the model predictors seem to be acceptable 
+#Linearity assumption checking
+Since VIF values are less than 5 , the model predictors seem to be acceptable(weak multi collinearity )
 Now need to address the assumptions of linear regression before we can conduct variable selection. we will start by linearity assumption. 
--we check residuals against each predictor to identify specific non-linear relationships. Residual vs Temperature seem to be problematic as it show a pattern that indicates the current model is not explaining the relation among predictors. 
-- we will add a quadratic term I(temp^2) since the residual vs temperature plots pattern seems to follow a quadratic function.
+-we check residuals against each predictor to identify specific non-linear relationships. Residual vs Temperature seems not to be problematic as it show a pattern that indicates the current model is  explaining the relation among predictors. 
 - we will add I(hum^2) since the residual vs humidity plot seems to follow a non linear pattern.
-- we will also add humidityXwindspeed , and humidityXtemp interaction terms since the correlation matrix shows that these predictors have strong relationships with one another.
 
-resulting model after the transformation show some improvement with regard to linearity assumption but both heteroscedasticity and normality assumption still is needed to be addressed. 
+resulting model after the transformation show some improvement with regard to linearity assumption but we still need to address both heteroscedasticity and normality assumptions.
+```{R}
+transformedFitted <- lm (cnt ~ temp + windspeed  + (I(hum^2)) + I(season == 1) + I(workingday == 1), data = hourData)
 
 
 
+
+# 3. Residuals vs Humidity^2
+plot( (I(hourData$hum^2)), transformedFitted$residuals,
+     main = "Residuals vs Humidity^2",
+     xlab = "Humidity^2",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+# 3. Residuals vs Temp
+plot( (hourData$temp), transformedFitted$residuals,
+     main = "Residuals vs Temp",
+     xlab = "Humidity",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+```
+
+#Constant variance assumption checking
 residuals vs. predictor plots indicate that residuals are centered around zero with no discernible pattern  suggesting  that the linearity assumption is met. 
 
-Now we need to address the heteroscedasticity present. We first try to transform response only (using log) the decision is due to the fact that log transformation is used for cases where variance of residual increase with the number of fitted value. however after applying the log transformation we see that the residuals go from a reverse funnel to a funnel pattern (decreasing variance). this suggest that the log transformation is over correcting the heteroscedasticity. we will try sq-rt transformation on the response. which slightly improve our model. since transforming only the response does not address the non constant variance present in the residuals we will try to transform our predictors. 
-- the plot of residuals vs temperature seems to satisfy the homoscedasticity so we dont transform temperature
-- we transform windspeed due to a funnel pattern present, we use a log transformation(windspeed+1), +1 is for not taking log(0).
-- we transform humidity by sqrt transformation 
- 
+Now we need to address the heteroscedasticity present. We first try to transform response only (using log) the decision is due to the fact that log transformation is used for cases where variance of residual increase with the number of fitted value. however after applying the log transformation we see that the residuals go from a reverse funnel to a funnel pattern (decreasing variance). 
 
+```{R}
+
+plot(transformedFitted, which = 1)
+
+
+transformedFitted2 <- lm (log(cnt) ~ temp+ windspeed  + I(hum^2) + I(season == 1) + I(workingday == 1), data = hourData)
+plot(transformedFitted2, which = 1)
+
+
+```
+
+this suggest that the log transformation is over correcting the heteroscedasticity. we will try sq-rt transformation on the response. which slightly improve our model. since transforming only the response does not address the non constant variance present in the residuals we will try to transform our predictors. 
+
+```{R}
+
+
+
+transformedFitted3 <- lm (sqrt(cnt) ~ temp+ windspeed  + I(hum^2) + I(season == 1) + I(workingday == 1), data = hourData)
+plot(transformedFitted3, which = 1)
+
+
+```
+
+
+
+- the plot of residuals vs temperature seems to satisfy the homoscedasticity so we don't transform temperature and we keep the temp as it is 
+
+- we transform wind speed due to a funnel pattern present, we use a log transformation(wind speed+1), +1 is for not taking log(0) which slightly improve the funnel shape.
+
+- we also transform hum^2 by taking a log transformation
+```{R}
+
+
+# 3. Residuals vs Humidity^2
+plot( (I(hourData$hum^2)), transformedFitted$residuals,
+     main = "Residuals vs Humidity^2",
+     xlab = "Humidity^2",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+# 3. Residuals vs windspeed
+plot( (hourData$windspeed) , transformedFitted3$residuals,
+     main = "Residuals vs windspeed",
+     xlab = "windspeed",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+transformedFitted4 <- lm (sqrt(cnt) ~ temp+ log(windspeed+1)  + log(I(hum^2))  + I(season == 1) + I(workingday == 1), data = hourData)
+plot(transformedFitted4, which = 1)
+# 3. Residuals vs log(Humidity^2)
+plot( log(I(hourData$hum^2)), transformedFitted$residuals,
+     main = "Residuals vs log(Humidity^2)",
+     xlab = "log(Humidity^2)",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+# 3. Residuals vs windspeed
+plot( (log(hourData$windspeed+1)) , transformedFitted4$residuals,
+     main = "Residuals vs log (windspeed+1)",
+     xlab = "log (windspeed+1)",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+
+```
+
+
+
+at this point the model we have is : 
+
+sqrt (count) = Temp + log(wind speed+1) + log(Humidity^2) + is Winter + is Working day
+ 
+#Normality assumption checking
+
+looking at QQ plots we see that residuals deviate from normality hence we implement box cox to transform 
+
+```{R}
+
+# Perform Box-Cox transformation
+boxcox_result <- boxcox(transformedFitted4, lambda = seq(-4, 4, by = 0.1))
+
+
+```
+the first iteration suggest that log-likelihood is maximized when lambda =2 , that is we need to transform the response by a power of 2 , undo sqrt transformation to make residuals normal.
+
+Now that we have addressed the assumptions of linear regression for the initial model we procede with F test for overall model significance 
+```{R}
+
+transformedFitted5 <- lm (cnt ~ temp+ log(windspeed+1)  + log(hum^2) + I(season == 1) + I(workingday == 1), data = hourData)
+
+vif(transformedFitted5)
+
+summary(transformedFitted5)
+```
+since the p-value for the F test is less than the 0.05 significance threshold we reject the null hypothesis in favor of the alternative. That is to conclude that the model as a whole is significant and at least one of the predictors in the model is significantly related to bike rentals counts.
+
+
+Now we proceed with variable selection which drops the wind speed as a predictor.
 
 ```{R}
 # Perform backward selection based on BIC
-backwardBICModel <- step(initialFitted, direction = "backward", k = log(nrow(hourData)))
+backwardBICModel <- step(transformedFitted5, direction = "backward", k = log(nrow(hourData)))
 
 # Display the summary of the selected model
 summary(backwardBICModel)
