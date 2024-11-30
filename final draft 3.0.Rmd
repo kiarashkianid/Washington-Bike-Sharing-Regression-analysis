@@ -33,21 +33,23 @@ Note that while this dataset has time series elements, the research question ask
 
 # Methods
 
-
+500 words max
 
 ---
 
 # Results
 
-
+750 words max
 
 ---
 
 # Conclusion & Limitations
 
+350 words max
 
+---
 
-
+# Appendix
 
 
 
