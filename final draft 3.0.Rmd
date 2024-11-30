@@ -15,15 +15,21 @@ output: html_document
 
 # Introduction
 
-Motor transportation accounts for a staggering 20% of greenhouse gas emissions in the U.S. (Agency, 2005; Gotschi & Mills, 2008), highlighting the urgent need for sustainable solutions such as bike-sharing systems. These systems are widely recognized as effective strategies to reduce CO2 emissions, alleviate traffic congestion, and combat obesity and diabetes (Bajracharya et al., 2018; Cai et al., 2019; Lumsdon & Tolley, 2001; Zhang et al., 2015; Shaheen et al., 2013). While bike-sharing offers significant environmental and health benefits, it must also adapt to the unique demand patterns of the cities where it is implemented. Thus, environmental and logistical factors are commonly used metrics for determining the optimal allocation of bikes (Christofa & Knodler, 2017). Godavarthy & Taleqani (2017) noted that many bike-sharing programs, such as Great Rides, Capital Bikeshare, and Boulder B-cycle, temporarily suspend operations during winter due to significantly lower trip generation.
+Motor transportation accounts for a staggering 20% of greenhouse gas emissions in the U.S. (Agency, 2005; Gotschi & Mills, 2008), pushing the need for sustainable solutions like bike-sharing systems to the forefront. These solutions are widely recognized as sustainable strategies to reduce CO2 emissions, alleviate traffic congestion, and preventing obesity and diabetes (Bajracharya et al., 2018; Cai et al., 2019; Lumsdon & Tolley, 2001; Zhang et al., 2015; Shaheen et al., 2013).
 
-We aim to **determine whether reducing operations to reflect seasonal demand changes is a reasonable approach for Bikeshare, supported by broader evidence on climate impacts and bike-sharing usage**. Our analysis focuses on Capital Bikeshare hourly usage data from 2011 during peak hours (5–6 PM and 8 AM). We plan to use linear regression to model the relationship between weather parameters, seasonality, and hourly bike-share usage, ultimately assessing whether observed seasonal patterns justify suspending operations during winter months for bike-share systems.
+While bike-sharing contributes significantly to environmental and health benefits, it must also adapt to the unique demand patterns of the specific city that they are installed in. Thus, environmental and logistical factors are common metrics that researchers look at to determine the optimal allocation of bikes.  The effects of these metrics on bikeshare usage is well documented in literature.
+
+Fournier, Christofa, and Knodler (2017) built a sinusodial model in their paper to examine seasonal bikeshare demand, and found a strong correlation between climate conditions, workday influences and bike-sharing usage.
+
+Godavarthy & Taleqani (2017) in particular noted that many bike-sharing programs such as Great Rides, Capital Bikeshare, and Boulder B-cycle, temporarily suspended operations during winter due to significantly lower trip generation.
+
+Beigi et al. (2022) examined the reallocation strategies used by Capital Bikeshare in Washington DC and found that the location of density of bikeshare stations significantly influenced bikeshare usage.  While location data is not considered in our paper, the allocation of bikeshare stations is still an important factor to keep in mind regarding the success of a bikeshare program.
+
+Our analysis focuses on Capital Bikeshare (or just Bikeshare) in 2011 during peak hours (5-6 PM and 8 AM), seeking to determine **whether reducing operations to reflect seasonal demand changes is reasonable for Bikeshare, as supported by the broader evidence on climate impacts and bikeshare usage.**
+
+Note that while this dataset has time series elements, the research question asks for the effect of *winter specifically* on Bikeshare usage.  Thus, we believe a linear regression is still appropriate with this research question.
 
 ---
-
-# Methods
-
-
 
 # Data Description
 
