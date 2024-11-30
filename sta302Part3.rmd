@@ -1,7 +1,9 @@
 ---
 title: "STA302 Group 85 Project Proposal"
-authors: "Kiarash Kianidehkordi,Joyce Lin,Min Ji koo "
-output: html_notebook
+authors: 'Kiarash Kianidehkordi,Joyce Lin,Min Ji koo '
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 #Assumptions of linear regression
@@ -19,16 +21,18 @@ install.packages("tidyverse")
 install.packages("car")
 install.packages("readr")
 install.packages("dplyr")
+install.packages("here", dependencies = TRUE)
 
 library(readr)
 library(dbplyr)
 library(MASS)
 library(car)
+library(here)
 
 ```
 
 ```{r}
-totalData <-read_csv("C:\\Users\\Kiarash\\OneDrive\\Desktop\\University\\statistics\\STA302\\bike+sharing+dataset\\hour.csv")
+totalData <-read_csv(here("data", "hour.csv"))
 head(totalData)
 
 str(totalData)
@@ -256,7 +260,7 @@ plot( (hourData$temp), transformedFitted$residuals,
 
 ```
 
-#Constant variance assumption checking
+# Constant variance assumption checking
 residuals vs. predictor plots indicate that residuals are centered around zero with no discernible pattern  suggesting  that the linearity assumption is met. 
 
 Now we need to address the heteroscedasticity present. We first try to transform response only (using log) the decision is due to the fact that log transformation is used for cases where variance of residual increase with the number of fitted value. however after applying the log transformation we see that the residuals go from a reverse funnel to a funnel pattern (decreasing variance). 

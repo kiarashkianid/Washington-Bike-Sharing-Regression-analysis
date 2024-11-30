@@ -25,9 +25,31 @@ Godavarthy & Taleqani (2017) in particular noted that many bike-sharing programs
 
 Beigi et al. (2022) examined the reallocation strategies used by Capital Bikeshare in Washington DC and found that the location of density of bikeshare stations significantly influenced bikeshare usage.  While location data is not considered in our paper, the allocation of bikeshare stations is still an important factor to keep in mind regarding the success of a bikeshare program.
 
-Our analysis focuses on Capital Bikeshare (or just Bikeshare) in 2011 during peak hours (5-6 PM and 8 AM), seeking to determine **whether reducing operations to reflect seasonal demand changes is reasonable for Bikeshare, as supported by the broader evidence on climate impacts and bikeshare usage.**
+Our analysis focuses on Capital Bikeshare (or just Bikeshare) in 2011 during peak hours (5-6 PM and 8 AM), seeking to determine **whether reducing operations to reflect seasonal demand changes is reasonable for Bikeshare, as supported by the broader evidence on climate impacts and bikeshare usage.**  To do this, we assess the difference in peak hour usage between winter-time and non-winter time, controlling for weather and weekend/holiday factors.
 
 Note that while this dataset has time series elements, the research question asks for the effect of *winter specifically* on Bikeshare usage.  Thus, we believe a linear regression is still appropriate with this research question.
+
+---
+
+# Methods
+
+
+
+---
+
+# Results
+
+
+
+---
+
+# Conclusion & Limitations
+
+
+
+
+
+
 
 ---
 
@@ -71,6 +93,20 @@ In the hourly scale, each record includes variables such as hour, month, working
   - `atemp`: Normalized feeling temperature in Celsius
 
 This analysis will take data from 2011 and for the hours 5 - 6PM and 8AM.  We take from 2011 only because 2011 data is intended to be training data, while  5 - 6PM and 8AM are shown to be the top 3 busiest hours for Bikeshare usage.  Focusing on peak hours in the morning and the afternoon captures the most critical hours for bike share demand and removes temporal continuity that would be present if all hours of the day were considered instead, which would have made this analysis invalid for a linear regression.
+
+Our initial model is as follows:
+
+$$
+\begin{equation}
+\begin{split}
+
+\hat{\text{cnt}}=&\hat\beta_0 + \hat\beta_1\text{is_winter} + \hat\beta_2\text{workingday}\\
+&+\hat\beta_3\text{temp} + \hat\beta_4\text{hum} + \hat\beta_5\text{windspeed}\\
+&+\epsilon
+
+\end{split}
+\end{equation}
+$$
 
 Once again, I will note that while this dataset has time series elements, the research question asks for the effect of *winter specifically* on Bikeshare usage.  Thus, I believe a linear regression is still appropriate with this research question, as the analysis will be focusing on the effect of winter = 1 versus winter = 0.  Of course, these choices hinge on the assumption that the variation of Bikeshare usage during the top 3 hours, holding other variables like temp and workingday constant, is independent.
 
