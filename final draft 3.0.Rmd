@@ -35,11 +35,85 @@ Note that while this dataset has time series elements, the research question ask
 
 500 words max
 
+We begin with the initial model:
+
+$$
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 hum + \beta_5 windspeed + \epsilon
+$$
+
+where hourly Bikeshare usage for peak hours (\(cnt\)) is a function of:
+
+- \(is\_winter\): A dummy for winter months
+- \(workingday\): A dummy for a working day
+- \(temp\): Normalized temperature
+- \(hum\): Humidity
+- \(windspeed\): Wind speed.
+
+Here is an overview of our method:
+
+- assessing + transforming the model
+   - assumptions of linear regression
+   - outliers
+   - multicollinearity in the predictors
+- variable selection
+
+## Assumptions of Linear Regression
+The assumptions of linear regression are:
+
+1) Linearity,
+2) Constant variance of errors,
+3) Normal distribution of errors,
+4) Independence of errors.
+
+The fourth assumption is hard to test from just the data alone and is typically assumed to hold, but the other three can be tested using the residual plots and a Q-Q plot.  If signs of non-linearity, heteroscedasticity, or non-normality are observed, appropriate transformations may be required to address these signs.  Typically, the transformation will be logarithmic or achieved using the boxcox method.
+
+## Outliers
+
+First, we assess the data for any potential outliers using Cook's Distance.  For any identified outliers, we evaluate their leverage and influence
+
+Leverage is measured using hat values, with values exceeding $2(p+1)\over n$ indicating high leverage. Influence is measured through differences in individual betas (DFBETAs) and differences in individual fits (DFFITS), with thresholds of $2\over \sqrt{n}$ and $2\sqrt{(p+1)\over n}$, respectively.  Observations deemed both influential and high leverage will be removed;  otherwise they will be kept.
+
+## Multicollinearity in the Predictors
+
+Following this, we assess the adequacy of the model.  We begin with a matrix plot of predictors and a correlation matrix to examine the relationships among the predictors and the response.  The goal is to identify any signs of multicollinearity, and identify non-linear relationships between the response and a predictor.
+
+To quantify multicollinearity in particular, we calculate the variance inflation factor (VIF) for each predictor;  generally, a VIF that exceeds a threshold of 5 indicates problematic multicollinearity, which necessitates removing, adding, or combining predictors.
+
+## Variable Selection
+
+Once the model is assessed and transformed, the standardized residual histogram should follow a normal distribution, and the residual scatter plot should show no discernible pattern.
+
+
+
+
+
 ---
 
 # Results
 
 750 words max
+
+We begin with the initial model:
+
+$$
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 hum + \beta_5 windspeed + \epsilon
+$$
+
+where hourly Bikeshare usage for peak hours (\(cnt\)) is a function of:
+- \(is\_winter\): A dummy for winter months
+- \(workingday\): A dummy for a working day
+- \(temp\): Normalized temperature
+- \(hum\): Humidity
+- \(windspeed\): Wind speed.
+
+<div style="text-align: center;">
+<img src="IMAGES/residuals_and_outliers_custom.png" alt="Residual diagnostic plots" width="60%">
+<p><strong>Table 1:</strong> Residual diagnostic plots and Cook's Distance for initial model assessment.</p>
+</div>
+
+The scatterplots of residuals versus fitted and scale-location show evidence of heteroscedasticity, that being the funnel shape that begins on the left and expands toward the right. This pattern indicates a violation of constant variance and linearity. Additionally, the QQplot above shows that the residuals deviate  at both tails, suggesting a violation of normality.
+
+We also examined the possibility of outliers within the data.  However, the observations highlighted by Cook's Distance were not found to have high leverage or influence.
 
 ---
 
@@ -52,182 +126,6 @@ Note that while this dataset has time series elements, the research question ask
 # Appendix
 
 
-
----
-
-# Data Description
-
-The bike-sharing dataset, extracted from the UCI Machine Learning Repository (Fanaee-T & Gama, 2013), contains two years' worth of data from the Capital Bikeshare (CBS) system.
-
-To avoid trend issues, the authors of the original paper (Fanaee-T, H., Gama, J, 2013) selected data corresponding only to the years 2011 and 2012, consisting of 3,807,587 records. After collecting the raw trip data, the authors aggregated it at two levels: hourly and daily. The hourly time series contains 17,379 hours, and the daily time series contains 731 days (Fanaee-T, H., Gama, J, 2013). Both time series were split into two sets: 2011 (train) and 2012 (test).
-
-Weather temperature, apparent temperature, wind speed, wind gust, humidity, pressure, dew point, and visibility for each hour from January 1, 2011, to December 31, 2012, for Washington, D.C., USA, were extracted from (Freemeteo 2013) and mapped to the corresponding hours in the bike rental time series.
-
-For hours with missing weather reports, the closest available report was used. Additionally, the official holidays of Washington, D.C., were extracted and mapped to the corresponding dates from (Department of Human Resources 2013). Holidays were combined with weekends, and each day was classified as either a working day or a non-working day. Based on the weather data, each hour was assigned one of four weather grades: good, cloudy, bad, or very bad (Fanaee-T, H., Gama, J,2013).
-
-In the hourly scale, each record includes variables such as hour, month, working day status, season, weather grade, temperature, felt temperature, humidity, and wind speed, along with the hourly aggregated count of rented bikes as the target value. In the daily scale, each record contains variables such as month, working day status, season, daily average weather grade, daily average temperature, daily average felt temperature, daily average humidity, and daily average wind speed.
-
----
-
-# Preliminary Results
-
-**Data Source**: Bikeshare data from Washington DC, covering 2011-2012.
-
-- **Variables used in this analysis**:
-  - `season`: season (1: winter, 2: spring, 3: summer, 4: fall)
-    - `is_winter`: variable created from season (1: winter, 0 otherwise)
-  - `workingday`: weekday that is not a holiday (1, 0 otherwise)
-  - `temp`: normalized temperature (°C), calculated by (t - t_min) / (t_max - t_min)
-  - `hum`: normalized humidity. The values are divided to 100 (max)
-  - `windspeed`: Normalized wind speed. The values are divided to 67 (max)
-  - `cnt`: count of total rental bikes including both casual and registered (per hour)
-
-- **Other variables**
-  - `dteday`: date variable (YYYY-MM-DD)
-  - `hr`: hour of the day (0-23)
-  - `mnth`: month variable (1-12)
-  - `yr`: year (0: 2011, 1: 2012)
-  - `weathersit`: discrete variable denoting the weather conditions during a given hour
-    - 1 : clear, few cloud, partly cloudy
-    - 2: mist, cloudy mist, broken cloud, mist + few clouds
-    - 3: light snow, light rain thunderstorm, scattered clouds, light rain + scatter clouds
-    - 4: heavy rains, ice pellets + thunderstorm + mist, snow + fog
-  - `atemp`: Normalized feeling temperature in Celsius
-
-This analysis will take data from 2011 and for the hours 5 - 6PM and 8AM.  We take from 2011 only because 2011 data is intended to be training data, while  5 - 6PM and 8AM are shown to be the top 3 busiest hours for Bikeshare usage.  Focusing on peak hours in the morning and the afternoon captures the most critical hours for bike share demand and removes temporal continuity that would be present if all hours of the day were considered instead, which would have made this analysis invalid for a linear regression.
-
-Our initial model is as follows:
-
-$$
-\begin{equation}
-\begin{split}
-
-\hat{\text{cnt}}=&\hat\beta_0 + \hat\beta_1\text{is_winter} + \hat\beta_2\text{workingday}\\
-&+\hat\beta_3\text{temp} + \hat\beta_4\text{hum} + \hat\beta_5\text{windspeed}\\
-&+\epsilon
-
-\end{split}
-\end{equation}
-$$
-
-Once again, I will note that while this dataset has time series elements, the research question asks for the effect of *winter specifically* on Bikeshare usage.  Thus, I believe a linear regression is still appropriate with this research question, as the analysis will be focusing on the effect of winter = 1 versus winter = 0.  Of course, these choices hinge on the assumption that the variation of Bikeshare usage during the top 3 hours, holding other variables like temp and workingday constant, is independent.
-
-The dataset that includes data from 2011 and for the hours 5 - 6PM and 8AM has 1,095 observations.
-
-```{r setup, include=FALSE, warning=FALSE}
-
-# Set global chunk options
-knitr::opts_chunk$set(echo = FALSE, results = 'hide', message = FALSE, warning = FALSE)
-
-# Load data
-data <- read.csv("hour.csv")
-data$dteday <- as.Date(data$dteday)
-
-# Group the data by hour and calculate the average 'cnt' (bike usage)
-avg_usage_by_hour <- aggregate(cnt ~ hr, data = data, FUN = mean)
-
-# Sort by average usage in descending order and select the top 3 hours with the highest average usage
-avg_usage_by_hour <- avg_usage_by_hour[order(-avg_usage_by_hour$cnt),]
-top_3_hours <- head(avg_usage_by_hour, 3)
-print(top_3_hours)
-```
-```{r}
-# Subset data to only include what I want
-data1 <- data[data$yr == 0 & data$hr %in% c(8, 17, 18), ]
-
-# Select only the specified columns and create is_winter variable
-data1 <- data1[, c("season", "workingday", "temp", "hum", "windspeed", "cnt")]
-
-data1$is_winter <- ifelse(data1$season == 1, 1, 0)
-
-write.csv(data1, file = "hour_modified.csv", row.names = FALSE)
-summary(data1)
-```
-
-### Model Specification
-
-The model is established as follows:
-
-$$
-\begin{equation}
-\begin{split}
-
-\hat{\text{cnt}}=&\hat\beta_0 + \hat\beta_1\text{is_winter} + \hat\beta_2\text{workingday}\\
-&+\hat\beta_3\text{temp} + \hat\beta_4\text{hum} + \hat\beta_5\text{windspeed}\\
-&+\epsilon
-
-\end{split}
-\end{equation}
-$$
-
-where hourly Bikeshare usage (`cnt`) is a function of a dummy for winter months, a dummy for a working day, normalized temperature, humidity, and wind speed.
-
-```{r}
-lin_reg = lm(cnt ~ is_winter + workingday + temp + hum + windspeed,
-                  data = data1)
-summary(lin_reg)
-```
-
-![Regression Table Screenshot](lin_reg.png)
-
-According to the regression analysis, Bikeshare usage during peak hours in 2011 drops by an average of 116 uses per hour during winter months.  Unsurprisingly, a working day is expected to increase hourly usage by 179.
-
-While humidity has a higher magnitude coefficient, its range is [0, 1], such that 1 percentage point would decrease Bikeshare usage by only 2 per hour.  Similarly, temperature ranges between [0, 1] so that an increase of 1 percentage point from $t_{min}$ toward $t_{max}$ is predicted to increase Bikeshare traffic by 3.2.
-
-
-
-### Residual Analysis
-
-For the residuals of a linear regression, four assumptions should hold for the model to provide accurate predictions of the dataset:
-1. linearity assumption
-2. constant variance of the errors
-3. normal errors
-4. independent errors
-
-While the fourth assumption is hard to test from just the data alone, the other three can be tested using various diagnostics.
-
-```{r}
-lin_reg_fitteds = fitted(lin_reg)
-lin_reg_residuals = resid(lin_reg)
-
-plot(lin_reg_fitteds, lin_reg_residuals,
-     main = "Bikeshare Usage:  Fitted vs. Residual Values",
-     xlab = "Fitted",
-     ylab = "Residuals",
-     col = "steelblue",
-     cex = 0.6)
-```
-
-The scatterplot of residuals versus fitted values shows evidence of heteroscedasticity, as the variation in residuals increases significantly as the fitted values increase.  The variation in residuals increases drastically as the fitted value increases from 0 to 600, from around 100 to anywhere between -300 to 150.  This pattern indicates a violation of constant variance.
-
-Moreover, the downward trend in the residuals as the fitted values increases suggests a violation of the linearity assumption.  If the linearity assumption held, the residuals would be randomly distributed around 0 with no discernible pattern.  The fact that the scatter exhibits a pattern may mean that the model is not capturing the relationship between the predictors and the response accurately.
-
-```{r}
-# Create a QQ plot for the residuals
-par(mfrow=c(1, 2))
-
-hist(rstandard(lin_reg),
-     main = "Standardized residuals histogram",
-     xlab = "standardized residuals")
-
-qqnorm(lin_reg_residuals,
-       main = "QQ Plot of Residuals",
-       xlab = "Theoretical Quantiles",
-       ylab = "Sample Quantiles",
-       col = "steelblue",
-       cex = 0.6)
-
-# Add a reference line to the QQ plot
-qqline(lin_reg_residuals, col = "red")
-```
-
-The QQplot above shows that the residuals deviate from the red line at both tails, suggesting that it does not follow a normal distribution.  Additionally, the histogram shows a negative skew.  This deviation in the tails implies that the model struggles with extreme residuals, potentially pointing to non-normality in the tails of the distribution.
-
-```{r}
-plot(data1[, c(7, 2, 3, 4, 5)], col = 'steelblue', cex = 0.6)
-```
-
-With the exception of dummy variables `is_winter` and `workingday`, for which the relationship can be hard to tell, the other variables appear to have unusual scatter patterns for the most part.  Most notably, in the relationship between `temp` or `hum` and `windspeed`, there exists a row of data points along the edge of the graph that is separate from the rest of the scattered data.  This separation may disproportionately affect the model.
 
 ---
 ---

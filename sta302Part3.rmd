@@ -33,6 +33,10 @@ library(here)
 
 ```{r}
 totalData <-read_csv(here("data", "hour.csv"))
+
+totalData$is_winter <- ifelse(totalData$season == 1, 1, 0)
+totalData$season <- NULL
+
 head(totalData)
 
 str(totalData)
@@ -43,19 +47,19 @@ hourData <- totalData[totalData$hr %in% c(8, 17, 18) & totalData$yr == 1, ]
 
 
 # Scatter plot of bike rental count vs season
-plot(hourData$season, hourData$cnt,
+plot(hourData$is_winter, hourData$cnt,
      main = "Bike Rental Count vs Season",
      xlab = "Season",
      ylab = "Bike Rental Count",
      col = "lightblue",
      pch = 19)
 
-boxplot(hourData$cnt ~ hourData$season,
+boxplot(hourData$cnt ~ hourData$is_winter,
         main = "Bike Rental Count by Season",
         xlab = "Season",
         ylab = "Bike Rental Count",
         col = "lightgreen",
-        names = c("Winter", "Spring", "Summer", "Fall"))
+        names = c("Not Winter", "Winter"))
 # Scatter plot of bike rental count vs wind speed
 plot(hourData$windspeed, hourData$cnt,
      main = "Bike Rental Count vs Wind Speed",
@@ -95,7 +99,7 @@ boxplot(hourData$cnt ~ hourData$workingday,
 ```
 ```{r}
 # Fit the linear model with Winter and Working Day as binary indicators
-initialFitted <-lm (cnt ~ temp +  windspeed + hum + I(season == 1) + I(workingday == 1), data = hourData)
+initialFitted <-lm (cnt ~ temp +  windspeed + hum + is_winter + I(workingday == 1), data = hourData)
 # Display the summary of the model
 summary(initialFitted)
 
@@ -110,6 +114,40 @@ plot(initialFitted, which = 2)
 
 ```
 
+```{r}
+# Set the desired dimensions for the image (in pixels)
+width <- 600   # Width in pixels
+height <- 600  # Height in pixels (adjust based on aspect ratio)
+
+# Open a PNG device to save the plot
+png("IMAGES/residuals_and_outliers_custom.png", width = width, height = height)
+
+# Set up a 2x2 plotting layout
+par(mfrow=c(2, 2))
+
+# Generate the plots (this will create 4 diagnostic plots)
+plot(initialFitted, which = c(1, 2, 3, 4))
+
+# Turn off the device to save the image
+dev.off()
+
+```
+
+```{r}
+cooks.distance(initialFitted)[c(230, 459, 543)]
+```
+```{r}
+hourData[c(230, 459, 543), ]
+```
+```{r}
+rstandard(initialFitted)[c(230, 459, 543)]
+
+hatvalues(initialFitted)[c(230, 459, 543)]
+
+dfbetas(initialFitted)[c(230, 459, 543), ]
+dffits(initialFitted)[c(230, 459, 543)]
+```
+
 
 #Analysis of regression based on the proposed procedure in part 2 
 The procedure followed in this analysis is available at [Sta302 Project Part 2](https://github.com/kiarashkianid/Washington-Bike-Sharing-Regression-analysis/blob/main/STA302%20project%20part%202.drawio%20(1).png).
@@ -118,7 +156,7 @@ The procedure followed in this analysis is available at [Sta302 Project Part 2](
 we will use the initialFitted model as our starting point. To check the assumption of linear regression our first task is to draw residual vs fitted plot and residual vs predicors scatter plot 
 ```{r}
 # Select relevant predictors for the matrix plot
-predictors <- hourData[, c("temp", "hum", "windspeed","season","workingday")]
+predictors <- hourData[, c("temp", "hum", "windspeed","is_winter","workingday")]
 
 # Create a matrix plot
 pairs(predictors,
@@ -130,7 +168,7 @@ pairs(predictors,
 #we also draw the corrolation matrix to see the relations among the predictors and response.
 ```{r}
 # Select relevant numerical predictors for correlation analysis
-numericalData <- hourData[, c("temp", "hum", "windspeed","workingday","season","cnt")]
+numericalData <- hourData[, c("temp", "hum", "windspeed","workingday","is_winter","cnt")]
 
 # Calculate the correlation matrix
 corMatrix <- cor(numericalData)
@@ -186,7 +224,7 @@ plot(hourData$hum, residuals,
 
 
 # 5. Box plot for Residuals vs Winter (1 = Yes, 0 = No)
-boxplot(residuals ~ (hourData$season == 1),
+boxplot(residuals ~ (hourData$is_winter),
         main = "Residuals vs Winter",
         xlab = "Winter (1 = Yes, 0 = No)",
         ylab = "Residuals",
@@ -234,11 +272,12 @@ print(vif_values)
 Since VIF values are less than 5 , the model predictors seem to be acceptable(weak multi collinearity )
 Now need to address the assumptions of linear regression before we can conduct variable selection. we will start by linearity assumption. 
 -we check residuals against each predictor to identify specific non-linear relationships. Residual vs Temperature seems not to be problematic as it show a pattern that indicates the current model is  explaining the relation among predictors. 
-- we will add I(hum^2) since the residual vs humidity plot seems to follow a non linear pattern.
+# - we will add I(hum^2) since the residual vs humidity plot seems to follow a non linear pattern.
+   - uh temperature seems more non-linear than humidity?
 
 resulting model after the transformation show some improvement with regard to linearity assumption but we still need to address both heteroscedasticity and normality assumptions.
 ```{R}
-transformedFitted <- lm (cnt ~ temp + windspeed  + (I(hum^2)) + I(season == 1) + I(workingday == 1), data = hourData)
+transformedFitted <- lm (cnt ~ temp + windspeed  + (I(hum^2)) + is_winter + I(workingday == 1), data = hourData)
 
 
 
