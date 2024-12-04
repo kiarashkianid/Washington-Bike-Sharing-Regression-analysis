@@ -7,9 +7,9 @@ output: html_document
 
 # Contributions
 
-- **Kiarash Kianidehkordi**:  introduction, data description, compiling the dataset used in this paper, preliminary analysis code
-- **Min Ji Koo**:  introduction, data description
-- **Joyce Lin**:  introduction, preliminary analysis interpretation, knitting and finalizing the proposal
+- **Kiarash Kianidehkordi**:  introduction, analysis code, interpretation
+- **Min Ji Koo**:  introduction, analysis code
+- **Joyce Lin**:  introduction, methods, analysis code, knitting and finalizing
 
 ---
 
@@ -33,8 +33,6 @@ Note that while this dataset has time series elements, the research question ask
 
 # Methods
 
-500 words max
-
 We begin with the initial model:
 
 $$
@@ -47,73 +45,90 @@ where hourly Bikeshare usage for peak hours (\(cnt\)) is a function of:
 - \(workingday\): A dummy for a working day
 - \(temp\): Normalized temperature
 - \(hum\): Humidity
-- \(windspeed\): Wind speed.
+- \(windspeed\): Wind speed
 
-Here is an overview of our method:
-
-- assessing + transforming the model
-   - assumptions of linear regression
-   - outliers
-   - multicollinearity in the predictors
-- variable selection
-
-## Assumptions of Linear Regression
 The assumptions of linear regression are:
 
-1) Linearity,
-2) Constant variance of errors,
-3) Normal distribution of errors,
-4) Independence of errors.
+1) Linearity
+2) Constant variance of errors
+3) Normal distribution of errors
+4) Independence of errors
 
-The fourth assumption is hard to test from just the data alone and is typically assumed to hold, but the other three can be tested using the residual plots and a Q-Q plot.  If signs of non-linearity, heteroscedasticity, or non-normality are observed, appropriate transformations may be required to address these signs.  Typically, the transformation will be logarithmic or achieved using the boxcox method.
+The fourth assumption is hard to test from just the data alone and is assumed to hold, but the other three can be tested using the residual plots and a Q-Q plot.  If signs of non-linearity, heteroscedasticity, or non-normality are observed, transformations are required to address these signs.
 
-## Outliers
+Before we transform the model, we assess the data for any potential outliers using Cook's Distance.  For any identified outliers, we evaluate their leverage and influence.  Leverage is measured using hat values, with values exceeding $2(p+1)\over n$ indicating high leverage. Influence is measured through differences in individual betas (DFBETAs) and differences in individual fits (DFFITS), with thresholds of $2\over \sqrt{n}$ and $2\sqrt{(p+1)\over n}$, respectively.  Observations deemed both influential and high leverage will be removed.
 
-First, we assess the data for any potential outliers using Cook's Distance.  For any identified outliers, we evaluate their leverage and influence
+Following the outlier analysis, we use a matrix plot of predictors and a correlation matrix to identify signs of multicollinearity and non-linear relationships between the response and a predictor.  To quantify multicollinearity, we calculate the variance inflation factor (VIF) for each predictor;  generally, a VIF that exceeds a threshold of 5 necessitates removing, adding, or combining predictors.
 
-Leverage is measured using hat values, with values exceeding $2(p+1)\over n$ indicating high leverage. Influence is measured through differences in individual betas (DFBETAs) and differences in individual fits (DFFITS), with thresholds of $2\over \sqrt{n}$ and $2\sqrt{(p+1)\over n}$, respectively.  Observations deemed both influential and high leverage will be removed;  otherwise they will be kept.
+Next, we inspect the residuals vs. fitted values plot for constant variance. A random scatter of residuals suggests constant variance, while a funnel shape or systematic pattern indicates heteroscedasticity. We apply log or power transformations to the individual variables that show heteroscedasticity.
 
-## Multicollinearity in the Predictors
+Finally, we examine the normality of the residuals. A Q-Q plot of the residuals is used to assess whether they approximately follow a normal distribution. In cases of observed non-normality, we apply transformations to the response variable or predictors to improve normality.  Here, we try a log transformation of the response variable as well as the Box-Cox method, where the optimal lambda is determined for the most ideal transformation.
 
-Following this, we assess the adequacy of the model.  We begin with a matrix plot of predictors and a correlation matrix to examine the relationships among the predictors and the response.  The goal is to identify any signs of multicollinearity, and identify non-linear relationships between the response and a predictor.
+Now, we analyze the significance of the model itself using an F-test.  If the F-test fails to reject the null hypothesis ($H_0: \beta_1 = \beta_2 = ... = 0$), that means none of the predictors contribute meaningfully, which would require restructuring the initial model.  However, if the F-test rejects the null hypothesis, we employ backward selection using the Bayesian Information Criterion (BIC) to determine the optimal subset of predictors.  BIC iteratively removing predictors from the full model based on their statistical significance.  BIC penalizes model complexity more heavily than other criteria like AIC, which helps balance the trade-off between an accurate model and overfitting.
 
-To quantify multicollinearity in particular, we calculate the variance inflation factor (VIF) for each predictor;  generally, a VIF that exceeds a threshold of 5 indicates problematic multicollinearity, which necessitates removing, adding, or combining predictors.
-
-## Variable Selection
-
-Once the model is assessed and transformed, the standardized residual histogram should follow a normal distribution, and the residual scatter plot should show no discernible pattern.
-
-
-
-
+Once BIC is complete, the final model can be interpreted.  By eliminating unnecessary predictors and ensuring that the assumptions for linear regression are met, the resulting model can provide a clearer and more reliable understanding of the relationship between predictors and the response variable.
 
 ---
 
 # Results
 
-750 words max
-
-We begin with the initial model:
+Once again, the initial model is:
 
 $$
 \hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 hum + \beta_5 windspeed + \epsilon
 $$
 
-where hourly Bikeshare usage for peak hours (\(cnt\)) is a function of:
-- \(is\_winter\): A dummy for winter months
-- \(workingday\): A dummy for a working day
-- \(temp\): Normalized temperature
-- \(hum\): Humidity
-- \(windspeed\): Wind speed.
+## Initial Diagnostics
 
 <div style="text-align: center;">
 <img src="IMAGES/residuals_and_outliers_custom.png" alt="Residual diagnostic plots" width="60%">
 <p><strong>Table 1:</strong> Residual diagnostic plots and Cook's Distance for initial model assessment.</p>
 </div>
 
-The scatterplots of residuals versus fitted and scale-location show evidence of heteroscedasticity, that being the funnel shape that begins on the left and expands toward the right. This pattern indicates a violation of constant variance and linearity. Additionally, the QQplot above shows that the residuals deviate  at both tails, suggesting a violation of normality.
+We began by assessing the residuals and predictors through various diagnostic plots shown in Table 1.  The scatterplots of residuals versus fitted and scale-location showed a funnel shape that begins on the left and expands toward the right, indicating heteroscedasticity. This pattern indicated a violation of constant variance and linearity. Additionally, the Q-Q plot (top right) showed deviations from normality at both tails, highlighting a potential violation of the normality assumption.
 
-We also examined the possibility of outliers within the data.  However, the observations highlighted by Cook's Distance were not found to have high leverage or influence.
+To assess the influence of outliers, we computed Cook’s Distance for all observations. While some observations had elevated Cook’s Distance values, they did not exhibit high leverage or influence when evaluated using hat values, DFBETAs, and DFFITS. Therefore, no observations were removed from the dataset.
+
+## Addressing Assumption Violations
+
+### Linearity
+
+<div style="text-align: center;">
+<img src="IMAGES/residuals_plots.png" alt="Residual diagnostic plots" width="60%">
+<p><strong>Table 2:</strong> Residual diagnostic plots and Cook's Distance for initial model assessment.</p>
+</div>
+
+We assessed the residuals and predictors through more diagnostic plots specific to the predictors:  residual vs. predictor scatter plots, a matrix plot, and a correlation matrix.  While the plots hinted at some correlation between humidity and temperature, as well as temperature and the winter season indicator, variance inflation factors (VIFs) for these pairs were computed and found to be below the threshold (VIF < 5) indicating weak multicollinearity. Thus, no predictors were removed at this point.
+
+Additionally, the scatterplots of residuals vs. predictors showed non-linearity for humidity.  Thus, we added a squared term ($hum^2$) to address this based on the quadratic pattern present in the residual vs. humidity plot.
+
+### Heteroscedasticity
+
+Next, the funnel-shaped pattern in the residual vs. fitted plots in Table 2 led us to test transformations for both the response variable and individual predictors.  Initially, we applied a log transformation to the response variable; however, this overcorrected the heteroscedasticity.  We proceeded with a square-root transformation of the response instead (Roediger & McDermott, 1995), which partially improved heteroscedasticity.
+
+We also saw a funnel shape in the residual vs, wind speed and residuals vs. humidity plots, which we addressed by log-transforming the two variable.
+
+### Constant Variance/Normality
+
+The Q-Q plot of the residuals from Table 1 suggested deviations from normality, particularly in the tails. We applied a Box-Cox transformation to the response variable, which determined an optimal $\lambda = 2$ for a power transformation. This improved the normality of residuals, necessitating the removal of the earlier square-root transformation of the response.
+
+Thus, the model became:
+
+$$
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 \log(hum^2) + \beta_5 \log(windspeed + 1) + \epsilon
+$$
+
+## Variable Selection
+
+We employed backward selection using the Bayesian Information Criterion (BIC) to identify the optimal subset of predictors. Through this process, the log-transformed wind speed was excluded, leaving the final model as:
+
+$$
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 \log(hum^2) + \epsilon
+$$
+
+An F-test confirmed that the overall model was statistically significant ($p\le0.05$), indicating that at least one predictor had a meaningful association with the response variable.
+
+## Interpretation
 
 ---
 
@@ -124,8 +139,6 @@ We also examined the possibility of outliers within the data.  However, the obse
 ---
 
 # Appendix
-
-
 
 ---
 ---
