@@ -23,6 +23,8 @@ install.packages("readr")
 install.packages("dplyr")
 install.packages("here", dependencies = TRUE)
 install.packages("stargazer")
+install.packages("corrplot")
+install.packages("MASS")
 
 library(readr)
 library(dbplyr)
@@ -30,7 +32,8 @@ library(MASS)
 library(car)
 library(here)
 library(stargazer)
-
+library(corrplot)
+library(MASS)
 ```
 
 ```{r}
@@ -181,15 +184,16 @@ corMatrix <- cor(numericalData)
 # Print the correlation matrix
 print(corMatrix)
 
-# Install and load the corrplot package
-install.packages("corrplot")
-library(corrplot)
-
-# Create a correlation plot
-corrplot(corMatrix, method = "circle", type = "upper", 
-         tl.col = "black", tl.srt = 45, # Rotate labels for better readability
+# Save plot as PNG
+png("IMAGES/correlation_matrix.png", width = 800, height = 600, res = 150) # Higher resolution
+corrplot(corMatrix, 
+         method = "circle", 
+         type = "upper", 
+         tl.col = "black", 
+         tl.srt = 45, 
          title = "Correlation Matrix of Variables", 
-         mar = c(0,0,1,0))  # Adjust margins for better display
+         mar = c(0, 0, 2, 0)) # Adjusted top margin for title
+dev.off()
 
 ```
 as we see count has highest correlation with temperature, humidity and hour of the day and least correlation with wind speed and whether the day is working day
@@ -317,14 +321,19 @@ residuals vs. predictor plots indicate that residuals are centered around zero w
 Now we need to address the heteroscedasticity present. We first try to transform response only (using log) the decision is due to the fact that log transformation is used for cases where variance of residual increase with the number of fitted value. however after applying the log transformation we see that the residuals go from a reverse funnel to a funnel pattern (decreasing variance). 
 
 ```{R}
+# Set the graphics device to save as PNG
+png("IMAGES/residuals_logvsqrt.png", width = 1200, height = 400)
 
-plot(transformedFitted, which = 1)
-
+# Set up a 3x2 plotting layout
+par(mfrow = c(1, 2))
 
 transformedFitted2 <- lm (log(cnt) ~ temp+ windspeed  + I(hum^2) + is_winter + I(workingday == 1), data = hourData)
 plot(transformedFitted2, which = 1)
 
+transformedFitted3 <- lm (sqrt(cnt) ~ temp+ windspeed  + I(hum^2) + is_winter + I(workingday == 1), data = hourData)
+plot(transformedFitted3, which = 1)
 
+dev.off()
 ```
 
 this suggest that the log transformation is over correcting the heteroscedasticity. we will try sq-rt transformation on the response. which slightly improve our model. since transforming only the response does not address the non constant variance present in the residuals we will try to transform our predictors. 
@@ -363,8 +372,10 @@ plot( (hourData$windspeed) , transformedFitted3$residuals,
      ylab = "Residuals",
      col = "lightblue",
      pch = 19)
+
 transformedFitted4 <- lm (sqrt(cnt) ~ temp+ log(windspeed+1)  + log(I(hum^2))  + is_winter + I(workingday == 1), data = hourData)
 plot(transformedFitted4, which = 1)
+
 # 3. Residuals vs log(Humidity^2)
 plot( log(I(hourData$hum^2)), transformedFitted$residuals,
      main = "Residuals vs log(Humidity^2)",
@@ -432,10 +443,36 @@ plot(backwardBICModel, which = 2)  # Normal Q-Q plot
 ```
 
 ```{r}
+# Set up a 1x2 plot layout
+par(mfrow = c(1, 2))
 
+plot(initialFitted, which = 2)  
 
+# Plot the normal Q-Q plot
+plot(backwardBICModel, which = 2)  # Normal Q-Q plot
+
+# Save the combined plot as an image with specific dimensions and resolution
+dev.copy(png, "IMAGES/qq_residuals_compare.png", width = 1200, height = 600, res = 150)  # Save the plot as a PNG file
+dev.off()  # Close the device
 ```
 
+```{r}
+# Fit the linear model with Winter and Working Day as binary indicators
+fitted0 <-lm (sqrt(cnt) ~ temp + windspeed + hum + is_winter + I(workingday == 1), data = hourData)
+fitted1 <-lm (cnt ~ temp + log(windspeed + 1) + log(hum^2) + is_winter + I(workingday == 1), data = hourData)
+
+par(mfrow = c(1, 2))
+
+# QQ plot for the initial model
+plot(fitted0, which = 2)  # Normal Q-Q plot for initial model
+
+# QQ plot for the final model (transformed response)
+plot(fitted1, which = 2)  # Normal Q-Q plot for final model
+
+dev.copy(png, "IMAGES/qq_residuals_compare.png", width = 1200, height = 600, res = 150)
+dev.off()
+
+```
 
 
 

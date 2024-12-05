@@ -1,0 +1,223 @@
+```{r}
+install.packages("tidyverse")
+install.packages("car")
+install.packages("readr")
+install.packages("dplyr")
+install.packages("here", dependencies = TRUE)
+install.packages("stargazer")
+install.packages("corrplot")
+install.packages("MASS")
+```
+```{r}
+library(readr)
+library(dbplyr)
+library(MASS)
+library(car)
+library(here)
+library(stargazer)
+library(corrplot)
+library(MASS)
+```
+```{r}
+totalData <-read_csv(here("data", "hour.csv"))
+
+totalData$is_winter <- ifelse(totalData$season == 1, 1, 0)
+totalData$season <- NULL
+hourData <- totalData[totalData$hr %in% c(8, 17, 18) & totalData$yr == 1, ]
+```
+
+# initial fitted
+
+```{r}
+initialFitted <-lm (cnt ~ temp +  windspeed + hum + is_winter + I(workingday == 1), data = hourData)
+summary(initialFitted)
+```
+
+```{r}
+# Select relevant predictors for the matrix plot
+predictors <- hourData[, c("temp", "hum", "windspeed","is_winter","workingday")]
+
+png("IMAGES/matrix_plot_predictors.png", width = 800, height = 600)
+
+# Create a matrix plot
+pairs(predictors,
+      main = "Matrix Plot of Predictors",
+      col = "lightblue",
+      pch = 19)
+
+dev.off()
+```
+
+```{r}
+# Select relevant numerical predictors for correlation analysis
+numericalData <- hourData[, c("temp", "hum", "windspeed","workingday","is_winter","cnt")]
+
+# Calculate the correlation matrix
+corMatrix <- cor(numericalData)
+
+# Print the correlation matrix
+print(corMatrix)
+
+# Save plot as PNG
+png("IMAGES/correlation_matrix.png", width = 800, height = 600, res = 150) # Higher resolution
+corrplot(corMatrix, 
+         method = "circle", 
+         type = "upper", 
+         tl.col = "black", 
+         tl.srt = 45, 
+         title = "Correlation Matrix of Variables", 
+         mar = c(0, 0, 2, 0)) # Adjusted top margin for title
+dev.off()
+```
+
+```{R}
+# Set the graphics device to save as PNG
+png("IMAGES/residuals_plots.png", width = 800, height = 800)
+
+# Set up a 3x2 plotting layout
+par(mfrow = c(3, 2))
+
+# 1. Residuals vs Fitted plot
+plot(initialFitted, which = 1)
+
+# Calculate residuals
+residuals <- initialFitted$residuals
+
+# Set up the plotting area to display multiple plots
+
+# 1. Residuals vs Temperature
+plot (hourData$temp, residuals,
+     main = "Residuals vs Temperature",
+     xlab = "Temperature",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 2. Residuals vs Windspeed
+plot( hourData$windspeed, residuals,
+     main = "Residuals vs Windspeed",
+     xlab = "Windspeed",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+# 3. Residuals vs Humidity
+plot(hourData$hum, residuals,
+     main = "Residuals vs Humidity",
+     xlab = "Humidity",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+
+
+# 5. Box plot for Residuals vs Winter (1 = Yes, 0 = No)
+boxplot(residuals ~ (hourData$is_winter),
+        main = "Residuals vs Winter",
+        xlab = "Winter (1 = Yes, 0 = No)",
+        ylab = "Residuals",
+        col = c("skyblue", "lightcoral"),
+        names = c("No (0)", "Yes (1)"),
+        border = "darkblue",
+        notch = TRUE) # Adds notches to visualize median differences
+
+# 6. Box plot for Residuals vs Working Day (1 = Yes, 0 = No)
+boxplot(residuals ~ hourData$workingday,
+        main = "Residuals vs Working Day",
+        xlab = "Working Day (1 = Yes, 0 = No)",
+        ylab = "Residuals",
+        col = c("lightgreen", "orange"),
+        names = c("No (0)", "Yes (1)"),
+        border = "darkgreen",
+        notch = TRUE) # Adds notches to visualize median differences
+
+dev.off()
+# Reset the plotting layout to a single plot
+par(mfrow = c(1, 1))
+```
+
+```{R}
+#find the VIF to check if multi-col linearity is present
+vif_values <- vif(initialFitted)
+
+# Print VIF values
+print(vif_values)
+```
+
+# Transformed1
+
+```{R}
+transformedFitted <- lm (cnt ~ temp + windspeed  + (I(hum^2)) + is_winter + I(workingday == 1), data = hourData)
+summary(transformedFitted)
+```
+
+```{r}
+# 3. Residuals vs Humidity^2
+plot( (I(hourData$hum^2)), transformedFitted$residuals,
+     main = "Residuals vs Humidity^2",
+     xlab = "Humidity^2",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+# 3. Residuals vs Temp
+plot( (hourData$temp), transformedFitted$residuals,
+     main = "Residuals vs Temp",
+     xlab = "Humidity",
+     ylab = "Residuals",
+     col = "lightblue",
+     pch = 19)
+```
+
+# Transformed 2
+
+```{r}
+transformedFitted2 <- lm (cnt ~ temp+ log(windspeed+1)  + log(I(hum^2))  + is_winter + I(workingday == 1), data = hourData)
+```
+
+```{R}
+png("IMAGES/boxcox_qqplot.png", width = 1200, height = 400)
+
+# Set layout for two plots side by side
+par(mfrow = c(1, 2))
+
+# Generate Q-Q plot
+qqnorm(residuals(transformedFitted2), main = "Q-Q Plot of Residuals")
+qqline(residuals(transformedFitted2), col = "red")
+
+# Generate Box-Cox plot
+boxcox_result <- boxcox(transformedFitted2, lambda = seq(-4, 4, by = 0.1))
+title(main = "Box-Cox Transformation Plot for Optimal Lambda Selection")
+
+# Save and reset layout
+dev.off()
+
+# Extract and display optimal lambda
+best_lambda <- boxcox_result$x[which.max(boxcox_result$y)]
+cat("Optimal lambda is:", best_lambda)
+```
+
+# Transformed 3
+
+```{R}
+# Perform backward selection based on BIC
+backwardBICModel <- step(transformedFitted, direction = "backward", k = log(nrow(hourData)))
+
+# Display the summary of the selected model
+summary(backwardBICModel)
+```
+
+```{R}
+# Plot the residuals vs fitted values for the final model
+plot(backwardBICModel, which = 1)  # Residuals vs Fitted
+
+# Plot normal Q-Q plot
+plot(backwardBICModel, which = 2)  # Normal Q-Q plot
+
+```
+
+
+
+
+
+
+
+

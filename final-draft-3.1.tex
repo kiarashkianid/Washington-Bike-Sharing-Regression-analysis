@@ -1,0 +1,416 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  10pt,
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{helvet}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Should Washington DC's Bikeshare System Reduce Operations During the Winter Months?},
+  pdfauthor={Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Should Washington DC's Bikeshare System Reduce Operations During
+the Winter Months?}
+\author{Kiarash Kianidehkordi, Min Ji Koo, Joyce Lin}
+\date{2024-12-04}
+
+\begin{document}
+\maketitle
+
+\section{Contributions}\label{contributions}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Kiarash Kianidehkordi}: introduction, analysis code,
+  interpretation
+\item
+  \textbf{Min Ji Koo}: introduction, analysis code
+\item
+  \textbf{Joyce Lin}: introduction, methods, analysis code, knitting and
+  finalizing
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Introduction}\label{introduction}
+
+Motor transportation accounts for a staggering 20\% of greenhouse gas
+emissions in the U.S. (Agency, 2005; Gotschi \& Mills, 2008), pushing
+the need for sustainable solutions like bike-sharing systems to the
+forefront. These solutions are widely recognized as sustainable
+strategies to reduce CO2 emissions, alleviate traffic congestion, and
+preventing obesity and diabetes (Bajracharya et al., 2018; Cai et al.,
+2019; Lumsdon \& Tolley, 2001; Zhang et al., 2015; Shaheen et al.,
+2013).
+
+While bike-sharing contributes significantly to environmental and health
+benefits, it must also adapt to the unique demand patterns of the
+specific city that they are installed in. Thus, environmental and
+logistical factors are common metrics that researchers look at to
+determine the optimal allocation of bikes. The effects of these metrics
+on bikeshare usage is well documented in literature.
+
+Fournier, Christofa, and Knodler (2017) built a sinusodial model in
+their paper to examine seasonal bikeshare demand, and found a strong
+correlation between climate conditions, workday influences and
+bike-sharing usage.
+
+Godavarthy \& Taleqani (2017) in particular noted that many bike-sharing
+programs such as Great Rides, Capital Bikeshare, and Boulder B-cycle,
+temporarily suspended operations during winter due to significantly
+lower trip generation.
+
+Beigi et al.~(2022) examined the reallocation strategies used by Capital
+Bikeshare in Washington DC and found that the location of density of
+bikeshare stations significantly influenced bikeshare usage. While
+location data is not considered in our paper, the allocation of
+bikeshare stations is still an important factor to keep in mind
+regarding the success of a bikeshare program.
+
+Our analysis focuses on Capital Bikeshare (or just Bikeshare) in 2011
+during peak hours (5-6 PM and 8 AM), seeking to determine
+\textbf{whether reducing operations to reflect seasonal demand changes
+is reasonable for Bikeshare, as supported by the broader evidence on
+climate impacts and bikeshare usage.} To do this, we assess the
+difference in peak hour usage between winter-time and non-winter time,
+controlling for weather and weekend/holiday factors.
+
+Note that while this dataset has time series elements, the research
+question asks for the effect of \emph{winter specifically} on Bikeshare
+usage. Thus, we believe a linear regression is still appropriate with
+this research question.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Methods}\label{methods}
+
+We begin with the initial model:
+
+\[
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 hum + \beta_5 windspeed + \epsilon
+\]
+
+where hourly Bikeshare usage for peak hours (\(cnt\)) is a function of:
+
+\begin{itemize}
+\tightlist
+\item
+  \(is\_winter\): A dummy for winter months
+\item
+  \(workingday\): A dummy for a working day
+\item
+  \(temp\): Normalized temperature
+\item
+  \(hum\): Humidity
+\item
+  \(windspeed\): Wind speed
+\end{itemize}
+
+The assumptions of linear regression are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\tightlist
+\item
+  Linearity
+\item
+  Constant variance of errors
+\item
+  Normal distribution of errors
+\item
+  Independence of errors
+\end{enumerate}
+
+The fourth assumption is hard to test from just the data alone and is
+assumed to hold, but the other three can be tested using the residual
+plots and a Q-Q plot. If signs of non-linearity, heteroscedasticity, or
+non-normality are observed, transformations are required to address
+these signs.
+
+Before we transform the model, we assess the data for any potential
+outliers using Cook's Distance. For any identified outliers, we evaluate
+their leverage and influence. Leverage is measured using hat values,
+with values exceeding \(2(p+1)\over n\) indicating high leverage.
+Influence is measured through differences in individual betas (DFBETAs)
+and differences in individual fits (DFFITS), with thresholds of
+\(2\over \sqrt{n}\) and \(2\sqrt{(p+1)\over n}\), respectively.
+Observations deemed both influential and high leverage will be removed.
+
+Following the outlier analysis, we use a matrix plot of predictors and a
+correlation matrix to identify signs of multicollinearity and non-linear
+relationships between the response and a predictor. To quantify
+multicollinearity, we calculate the variance inflation factor (VIF) for
+each predictor; generally, a VIF that exceeds a threshold of 5
+necessitates removing, adding, or combining predictors.
+
+Next, we inspect the residuals vs.~fitted values plot for constant
+variance. A random scatter of residuals suggests constant variance,
+while a funnel shape or systematic pattern indicates heteroscedasticity.
+We apply log or power transformations to the individual variables that
+show heteroscedasticity.
+
+Finally, we examine the normality of the residuals. A Q-Q plot of the
+residuals is used to assess whether they approximately follow a normal
+distribution. In cases of observed non-normality, we apply
+transformations to the response variable or predictors to improve
+normality. Here, we try a log transformation of the response variable as
+well as the Box-Cox method, where the optimal lambda is determined for
+the most ideal transformation.
+
+Now, we analyze the significance of the model itself using an F-test. If
+the F-test fails to reject the null hypothesis
+(\(H_0: \beta_1 = \beta_2 = ... = 0\)), that means none of the
+predictors contribute meaningfully, which would require restructuring
+the initial model. However, if the F-test rejects the null hypothesis,
+we employ backward selection using the Bayesian Information Criterion
+(BIC) to determine the optimal subset of predictors. BIC iteratively
+removing predictors from the full model based on their statistical
+significance. BIC penalizes model complexity more heavily than other
+criteria like AIC, which helps balance the trade-off between an accurate
+model and overfitting.
+
+Once BIC is complete, the final model can be interpreted. By eliminating
+unnecessary predictors and ensuring that the assumptions for linear
+regression are met, the resulting model can provide a clearer and more
+reliable understanding of the relationship between predictors and the
+response variable.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Results}\label{results}
+
+Once again, the initial model is:
+
+\[
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 hum + \beta_5 windspeed + \epsilon
+\]
+
+\subsection{Initial Diagnostics}\label{initial-diagnostics}
+
+Initial diagnostics included the residuals vs.~fitted values plot,
+residuals vs.~predictor scatter plots, a matrix plot of predictors, and
+their correlation matrix. These diagnostics were conducted prior to any
+transformations to assess the relationships among predictors and
+identify potential signs of multicollinearity or other violations of
+regression assumptions.
+
+In addition to the initial diagnostics, we also screened the data for
+influential/high leverage outliers, but found none.
+
+Table 1: Matrix Plot of Predictors
+
+Table 2: Correlation Matrix
+
+\subsubsection{Multicollinearity}\label{multicollinearity}
+
+While the matrix plots and correlation matrix hinted at some correlation
+between humidity and temperature, as well as temperature and the winter
+season indicator, variance inflation factors (VIFs) for these pairs were
+computed and found to be below the threshold (VIF \textless{} 5)
+indicating weak multicollinearity. Thus, no interaction terms were added
+at this point.
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{\textbf{Table 3}: Variance Inflation Factor (VIF) Values for
+Predictors}\tabularnewline
+\toprule\noalign{}
+Predictor & VIF \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Predictor & VIF \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+temp & 1.55 \\
+windspeed & 1.11 \\
+hum & 1.17 \\
+is\_winter & 1.49 \\
+workingday & 1.01 \\
+\end{longtable}
+
+\subsection{Linearity Assumption}\label{linearity-assumption}
+
+Following the multicollinearity analysis, we assessed the scatterplots
+of residuals vs.~predictors to identify any non-linear relationships.
+The plots revealed non-linearity for humidity, so we added a squared
+term (\(hum^2\)). We also attempted to apply a polynomial transformation
+to temperature; however, this transformation increased
+heteroscedasticity, so we reverted it to the original linear form.
+
+\subsubsection{Heteroscedasticity}\label{heteroscedasticity}
+
+Next, the funnel-shaped pattern in the residual vs.~fitted plots in
+Table 2 led us to test transformations for both the response variable
+and individual predictors. Initially, we applied a log transformation to
+the response variable; however, this overcorrected the
+heteroscedasticity. We proceeded with a square-root transformation of
+the response instead (Roediger \& McDermott, 1995), which partially
+improved heteroscedasticity.
+
+We also saw a funnel shape in the residual vs, wind speed and residuals
+vs.~humidity plots, which we addressed by log-transforming the two
+variable.
+
+\subsubsection{Constant
+Variance/Normality}\label{constant-variancenormality}
+
+The Q-Q plot of the residuals from Table 1 suggested deviations from
+normality, particularly in the tails. We applied a Box-Cox
+transformation to the response variable, which determined an optimal
+\(\lambda = 2\) for a power transformation. This improved the normality
+of residuals, necessitating the removal of the earlier square-root
+transformation of the response.
+
+Thus, the model became:
+
+\[
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 \log(hum^2) + \beta_5 \log(windspeed + 1) + \epsilon
+\]
+
+\subsection{Variable Selection}\label{variable-selection}
+
+We employed backward selection using the Bayesian Information Criterion
+(BIC) to identify the optimal subset of predictors. Through this
+process, the log-transformed wind speed was excluded, leaving the final
+model as:
+
+\[
+\hat{cnt} = \beta_0 + \beta_1 is\_winter + \beta_2 workingday + \beta_3 temp + \beta_4 \log(hum^2) + \epsilon
+\]
+
+An F-test confirmed that the overall model was statistically significant
+(\(p\le0.05\)), indicating that at least one predictor had a meaningful
+association with the response variable.
+
+\subsection{Interpretation}\label{interpretation}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Conclusion \& Limitations}\label{conclusion-limitations}
+
+350 words max
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Appendix}\label{appendix}
+
+\section{Bibliography}\label{bibliography}
+
+\begin{itemize}
+\tightlist
+\item
+  Agency, E. E. (2005). The European environment: State and outlook
+  2005. Office for Official Publ. of the European Communities.
+\item
+  Beigi, P., Khoueiry, M., Rajabi, M. S., \& Hamdar, S. (2022). Station
+  reallocation and rebalancing strategy for bike-sharing systems: A case
+  study of Washington DC. arXiv. \url{https://arxiv.org/abs/2204.07875}
+\item
+  Department of Human Resources: District of Columbia. Washington D.C.
+  holiday schedule. \url{http://dchr.dc.gov/page/holiday-schedule}
+  (2013)
+\item
+  Fanaee-T, H. (2013). Bike Sharing {[}Dataset{]}. UCI Machine Learning
+  Repository. \url{https://doi.org/10.24432/C5W894}.
+\item
+  Fanaee-T, H., Gama, J. Event labeling combining ensemble detectors and
+  background knowledge. Prog Artif Intell 2, 113--127 (2014).
+  \url{https://doi.org/10.1007/s13748-013-0040-3}
+\item
+  Freemeteo: Washington D.C. weather history.
+  \url{http://www.freemeteo.com} (2013)
+\item
+  Fournier, N., Christofa, E., \& Knodler, M. A., Jr.~(2017). A
+  sinusoidal model for seasonal bicycle demand estimation.
+  Transportation Research Part D, Transport and Environment, 50,
+  154--169.
+\item
+  Godavarthy, R. P., \& Taleqani, A. R. (2017). Winter bikesharing in
+  US: User willingness,and operator's challenges and best practices.
+  Sustainable Cities and Society, 30, 254--262.
+\item
+  Gotschi, T., \& Mills, K. (2008). Active transportation for America:
+  The case for increased federal investment in bicycling and walking.
+\item
+  Shaheen, S.A., Cohen, A.P., Martin, E.W.: Public Bikesharing in North
+  America. Transportation Research Record: Journal of the Transportation
+  Research Board, No.~2387, Transportation Research Board of the
+  National Academics, Washington, D.C., pp.~83--92 (2013)
+\item
+  Wadud, Z. (2014). Cycling in a changed climate. Journal of Transport
+  Geography, 35,12--20.
+\end{itemize}
+
+\end{document}
