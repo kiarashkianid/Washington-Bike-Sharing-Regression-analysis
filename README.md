@@ -1,5 +1,4 @@
-# STA302 Group Assignment
-
+# Washington Bike Sharing Regression analysis
 Welcome to the repository for Joyce, Kiarash, and Min Ji's Group Assignment for STA302. Below, you'll find the relevant files and links related to our project.
 
 ---
